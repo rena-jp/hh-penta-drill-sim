@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Hentai Heroes Penta Drill Sim
 // @namespace    https://github.com/rena-jp/hh-penta-drill-sim
-// @version      0.0.2
+// @version      0.0.3
 // @description  Add Penta Drill simulator for Hentai Heroes
 // @author       rena
 // @match        https://*.hentaiheroes.com/*
@@ -14,12 +14,125 @@
 // @match        https://*.mangarpg.com/*
 // @grant        none
 // @run-at       document-body
-// @updateURL    https://github.com/rena-jp/hh-penta-drill-sim/raw/main/dist/hh-penta-drill-sim.meta.js
+// @updateURL    https://github.com/rena-jp/hh-penta-drill-sim/raw/main/dist/hh-penta-drill-sim.dev.meta.js
 // @downloadURL  https://github.com/rena-jp/hh-penta-drill-sim/raw/main/dist/hh-penta-drill-sim.dev.user.js
 // ==/UserScript==
 
 "use strict";
 (() => {
+  // src/async.ts
+  var DomContentLoaded = new Promise((resolve) => {
+    if (document.readyState === "loading") {
+      window.addEventListener("DOMContentLoaded", () => resolve(), {
+        capture: true,
+        once: true
+      });
+    } else {
+      resolve();
+    }
+  });
+  var JQueryLoaded = new Promise((resolve) => {
+    if (window.$ != null) {
+      resolve();
+    } else {
+      DomContentLoaded.then(() => {
+        if (window.$ != null) {
+          resolve();
+        }
+      });
+    }
+  });
+  var GameScriptsRun = new Promise((resolve) => {
+    DomContentLoaded.then(() => {
+      $(() => {
+        resolve();
+      });
+    });
+  });
+  var ThirdpartyScriptsRun = new Promise((resolve) => {
+    GameScriptsRun.then(() => {
+      $(() => {
+        resolve();
+      });
+    });
+  });
+  async function beforeGameScriptsRun() {
+    await Promise.all([JQueryLoaded, DomContentLoaded]);
+  }
+  function afterJQueryLoaded() {
+    return JQueryLoaded;
+  }
+  function afterDomContentLoaded() {
+    return DomContentLoaded;
+  }
+  function afterGameScriptsRun() {
+    return GameScriptsRun;
+  }
+  function afterThirdpartyScriptsRun() {
+    return ThirdpartyScriptsRun;
+  }
+  function run(f) {
+    return new Promise((resolve) => {
+      queueMicrotask(() => {
+        Promise.resolve(f()).then(resolve);
+      });
+    });
+  }
+  async function importHHPlusPlus() {
+    if (window.HHPlusPlus) return window.HHPlusPlus;
+    await beforeGameScriptsRun();
+    if (window.HHPlusPlus) return window.HHPlusPlus;
+    await afterGameScriptsRun();
+    if (window.HHPlusPlus) return window.HHPlusPlus;
+    await afterThirdpartyScriptsRun();
+    return window.HHPlusPlus;
+  }
+  function querySelector(target, selector) {
+    return new Promise((resolve) => {
+      const tryResolve = () => {
+        const element = target.querySelector(selector);
+        const found = element !== null;
+        if (found) resolve(element);
+        return found;
+      };
+      if (tryResolve()) return;
+      const observer = new MutationObserver((mutations) => {
+        if (mutations.every((mutation) => mutation.addedNodes.length === 0))
+          return;
+        if (tryResolve()) observer.disconnect();
+      });
+      observer.observe(target, { childList: true, subtree: true });
+    });
+  }
+  function querySelectorAll(target, selector) {
+    return new Promise((resolve) => {
+      const tryResolve = () => {
+        const elements = target.querySelectorAll(selector);
+        const found = elements.length > 0;
+        if (found) resolve(elements);
+        return found;
+      };
+      if (tryResolve()) return;
+      const observer = new MutationObserver((mutations) => {
+        if (mutations.every((mutation) => mutation.addedNodes.length === 0))
+          return;
+        if (tryResolve()) observer.disconnect();
+      });
+      observer.observe(target, { childList: true, subtree: true });
+    });
+  }
+  var async_default = {
+    afterDomContentLoaded,
+    afterGameScriptsRun,
+    afterJQueryLoaded,
+    afterThirdpartyScriptsRun,
+    beforeGameScriptsRun,
+    importHHPlusPlus,
+    querySelector,
+    querySelectorAll,
+    run
+  };
+
   // src/data.ts
   function getTeamFromFighter(fighters) {
     const list = fighters.map((e) => getGirlFromFighter(e));
@@ -490,16 +603,22 @@
   var compact_grid_default = "body.page-edit-penta-drill-team .harem-panel .harem-panel-girls {\n  padding: 0;\n  grid-row-gap: 0;\n  grid-template-columns: repeat(5, 58px);\n}\nbody.page-edit-penta-drill-team .harem-panel-girls .harem-girl-container {\n  width: 58px;\n  height: 80px;\n}\n";
 
   // src/style/compact-rewards.css
-  var compact_rewards_default = "body.page-penta-drill-battle .popup_wrapper #rewards_popup .flex-container .rewards .container .scrolling_area,\nbody.page-penta-drill-battle .popup_wrapper #rewards_popup .flex-container .rewards .container .rewards_scrollable,\nbody.page-penta-drill-battle .popup_wrapper #rewards_popup .flex-container .rewards .rewards_background {\n  max-height: unset;\n}\nbody.page-penta-drill-battle .popup_wrapper #rewards_popup .flex-container .rewards .container .rewards_scrollable {\n  zoom: 0.65;\n}\nbody.page-penta-drill-battle #rewards_big_header {\n  zoom: 0.4;\n}\n";
+  var compact_rewards_default = "body.page-penta-drill-battle .popup_wrapper #rewards_popup .flex-container .rewards .container .scrolling_area,\nbody.page-penta-drill-battle .popup_wrapper #rewards_popup .flex-container .rewards .container .rewards_scrollable,\nbody.page-penta-drill-battle .popup_wrapper #rewards_popup .flex-container .rewards .rewards_background {\n  max-height: unset;\n}\nbody.page-penta-drill-battle #rewards_big_header:not(.losing) {\n  zoom: 0.4;\n}\nbody.page-penta-drill-battle .popup_wrapper #rewards_popup .flex-container .rewards .container .rewards_scrollable {\n  zoom: 0.65;\n}\n";
 
   // src/style/sim-results.css
-  var sim_results_default = ".pd-sim-result-box {\n  position: relative;\n  width: 100%;\n  height: 0;\n}\n.pd-sim-result-box .pd-sim-result {\n  position: absolute;\n  width: max-content;\n  height: 0;\n  line-height: 1.25rem;\n  text-align: center;\n  text-shadow:\n    -1px -1px 0 #000,\n    -1px 1px 0 #000,\n    1px -1px 0 #000,\n    1px 1px 0 #000;\n  z-index: 1;\n}\n.pd-sim-result-box .pd-sim-result .pd-sim-label {\n  font-size: 0.75rem;\n}\n.pd-sim-result-box .pd-sim-result.pd-sim-pending {\n  color: #999;\n}\n.penta-drill-battle .pd-sim-result-box .pd-sim-result {\n  bottom: 3rem;\n}\n.penta-drill-battle .pd-sim-result-box .pd-sim-result.pd-sim-right {\n  right: 0;\n}\n.penta-drill-battle .pd-sim-result-box .pd-sim-result.pd-sim-left {\n  left: 0;\n}\n.opponent-info-container .pd-sim-result-box .pd-sim-result {\n  bottom: 3.5rem;\n}\n.opponent-info-container .pd-sim-result-box .pd-sim-result.pd-sim-right {\n  right: 10%;\n}\n.opponent-info-container .pd-sim-result-box .pd-sim-result.pd-sim-left {\n  left: 10%;\n}\n.pd-sim-resource-box {\n  width: 100%;\n  height: 0;\n  position: relative;\n}\n.pd-sim-resource-box #drill_energy {\n  position: absolute;\n  bottom: 6rem;\n  left: 38%;\n  right: 38%;\n}\n";
+  var sim_results_default = ".pd-sim-result-box {\n  position: relative;\n  width: 100%;\n  height: 0;\n}\n.pd-sim-result-box .pd-sim-result {\n  position: absolute;\n  width: max-content;\n  height: 0;\n  line-height: 1.25rem;\n  text-align: center;\n  text-shadow:\n    -1px -1px 0 #000,\n    -1px 1px 0 #000,\n    1px -1px 0 #000,\n    1px 1px 0 #000;\n  z-index: 1;\n}\n.pd-sim-result-box .pd-sim-result .pd-sim-label {\n  font-size: 0.75rem;\n}\n.pd-sim-result-box .pd-sim-result.pd-sim-pending {\n  color: #999;\n}\n.penta-drill-battle .pd-sim-result-box .pd-sim-result {\n  bottom: 3rem;\n}\n.penta-drill-battle .pd-sim-result-box .pd-sim-result.pd-sim-right {\n  right: 0;\n}\n.penta-drill-battle .pd-sim-result-box .pd-sim-result.pd-sim-left {\n  left: 0;\n}\n.opponent-info-container .pd-sim-result-box .pd-sim-result {\n  bottom: 3.5rem;\n}\n.opponent-info-container .pd-sim-result-box .pd-sim-result.pd-sim-right {\n  right: 10%;\n}\n.opponent-info-container .pd-sim-result-box .pd-sim-result.pd-sim-left {\n  left: 10%;\n}\n";
 
   // src/style/tooltip-on-locked-girl.css
   var tooltip_on_locked_girl_default = "body.page-edit-penta-drill-team #edit-team-page.penta-drill .harem-panel .panel-body .harem-panel-girls .harem-girl-container:not(.selected)[team_slot] .grey-overlay {\n  pointer-events: none;\n}\n";
 
   // src/style/shortcut-bar.css
   var shortcut_bar_default = "#shortcut-bar-box {\n  position: absolute;\n  right: 408px;\n  width: fit-content;\n  display: flex;\n  flex-direction: row;\n  gap: 0.35rem;\n  padding: 0.7rem 1px 0.7rem 0.7rem;\n  border-radius: 0.7rem 0 0 0.7rem;\n  background-color: #4f222e;\n  z-index: 1;\n}\n#shortcut-bar-box .shortcut-bar {\n  display: flex;\n  flex-direction: column;\n}\n#shortcut-bar-box .shortcut-bar .check-btn.element-state {\n  width: 38px;\n  height: 38px;\n  padding: 0;\n}\n#shortcut-bar-box .shortcut-bar .check-btn.element-state .role-icn {\n  width: 36px;\n  height: 36px;\n  background-size: 27px;\n}\n@media (min-width: 1026px) {\n  #shortcut-bar-box {\n    top: 113px;\n  }\n}\n@media (max-width: 1025px) {\n  #shortcut-bar-box {\n    top: 134px;\n  }\n}\n";
+
+  // src/style/clickable-skip-buttons.css
+  var clickable_skip_buttons_default = "#named-attack-background,\n#named-attack-container,\n.pvp-girls {\n  pointer-events: none;\n}\n";
+
+  // src/style/add-resource-bar.css
+  var add_resource_bar_default = ".pd-sim-resource-box {\n  width: 100%;\n  height: 0;\n  position: relative;\n}\n.pd-sim-resource-box #drill_energy {\n  position: absolute;\n  bottom: 6rem;\n  left: 38%;\n  right: 38%;\n}\n.pd-sim-resource-box #drill_energy.energy_counter span[rel=count_txt] {\n  margin-top: 0;\n}\n";
 
   // src/types.ts
   var ElementTypes = [
@@ -538,15 +657,8 @@
   // src/index.ts
   (async function() {
     "use strict";
-    if (!window.$) return;
-    const Async = AsyncImpl();
-    const HHPlusPlus = await Async.importHHPlusPlus();
-    if (!HHPlusPlus) return;
-    const { Helpers } = HHPlusPlus;
-    const { hhPlusPlusConfig } = window;
-    if (!Helpers || !hhPlusPlusConfig) return;
-    const GROUP_KEY = "pdsim";
-    hhPlusPlusConfig.registerGroup({ key: GROUP_KEY, name: `PD Sim` });
+    await async_default.afterJQueryLoaded();
+    const PagePath = window.location.pathname;
     const moduleList = [
       PentaDrillSimModule,
       TeamEditingTweaksModule,
@@ -554,116 +666,58 @@
       FasterSkipButtonModule,
       CompactRewardsModule
     ];
+    const HHPlusPlus = await async_default.importHHPlusPlus();
+    if (HHPlusPlus) {
+      if (registerModules()) return;
+    }
     moduleList.forEach((f) => {
       const module = f();
-      if (!module || !module.run) return;
-      hhPlusPlusConfig.registerModule({
-        group: GROUP_KEY,
-        configSchema: {
-          baseKey: f.name,
-          label: module.label,
-          default: module.default ?? true,
-          subSettings: module.settings
-        },
-        hasRun: false,
-        run(subSettings) {
-          if (!this.hasRun) {
-            const maybePromise = module.run(subSettings);
-            this.hasRun = true;
-            Promise.resolve(maybePromise).then((result) => {
-              this.hasRun = result !== false;
-            });
-          }
-        },
-        tearDown() {
-          if (this.hasRun && module.undo) {
-            this.hasRun = module.undo() === false;
-          }
-        }
-        // updateSubSetting(subKey, value) { }, // No one uses it
-      });
+      if (module.default) {
+        const settings = module.settings?.reduce((p, c) => {
+          p[c.key] = c.default;
+          return p;
+        }, {});
+        module.run(settings);
+      }
     });
-    hhPlusPlusConfig.loadConfig();
-    hhPlusPlusConfig.runModules();
     return;
-    function AsyncImpl() {
-      const beforeGameScriptsRunPromise = new Promise((resolve) => {
-        if (document.readyState === "loading") {
-          window.addEventListener("DOMContentLoaded", () => resolve(), {
-            capture: true,
-            once: true
-          });
-        } else {
-          resolve();
-        }
-      });
-      const afterGameScriptsRunPromise = new Promise((resolve) => {
-        beforeGameScriptsRunPromise.then(() => {
-          $(() => {
-            resolve();
-          });
+    function registerModules() {
+      const { hhPlusPlusConfig } = window;
+      if (!hhPlusPlusConfig) return false;
+      const GROUP_KEY = "pdsim";
+      hhPlusPlusConfig.registerGroup({ key: GROUP_KEY, name: `PD Sim` });
+      moduleList.forEach((f) => {
+        const module = f();
+        if (!module || !module.run) return;
+        hhPlusPlusConfig.registerModule({
+          group: GROUP_KEY,
+          configSchema: {
+            baseKey: f.name,
+            label: module.label,
+            default: module.default ?? true,
+            subSettings: module.settings
+          },
+          hasRun: false,
+          run(subSettings) {
+            if (!this.hasRun) {
+              const maybePromise = module.run(subSettings);
+              this.hasRun = true;
+              Promise.resolve(maybePromise).then((result) => {
+                this.hasRun = result !== false;
+              });
+            }
+          },
+          tearDown() {
+            if (this.hasRun && module.undo) {
+              this.hasRun = module.undo() === false;
+            }
+          }
+          // updateSubSetting(subKey, value) { }, // No one uses it
         });
       });
-      const o = {
-        beforeGameScriptsRun() {
-          return beforeGameScriptsRunPromise;
-        },
-        afterGameScriptsRun() {
-          return afterGameScriptsRunPromise;
-        },
-        run(f) {
-          return new Promise((resolve) => {
-            queueMicrotask(() => {
-              Promise.resolve(f()).then(resolve);
-            });
-          });
-        },
-        domReady() {
-          return afterGameScriptsRunPromise;
-        },
-        async importHHPlusPlus() {
-          if (window.HHPlusPlus) return window.HHPlusPlus;
-          await this.beforeGameScriptsRun();
-          if (window.HHPlusPlus) return window.HHPlusPlus;
-          await this.afterGameScriptsRun();
-          return window.HHPlusPlus;
-        },
-        querySelector(target, selector) {
-          return new Promise((resolve) => {
-            const tryResolve = () => {
-              const element = target.querySelector(selector);
-              const found = element !== null;
-              if (found) resolve(element);
-              return found;
-            };
-            if (tryResolve()) return;
-            const observer = new MutationObserver((mutations) => {
-              if (mutations.every((mutation) => mutation.addedNodes.length === 0))
-                return;
-              if (tryResolve()) observer.disconnect();
-            });
-            observer.observe(target, { childList: true, subtree: true });
-          });
-        },
-        querySelectorAll(target, selector) {
-          return new Promise((resolve) => {
-            const tryResolve = () => {
-              const elements = target.querySelectorAll(selector);
-              const found = elements.length > 0;
-              if (found) resolve(elements);
-              return found;
-            };
-            if (tryResolve()) return;
-            const observer = new MutationObserver((mutations) => {
-              if (mutations.every((mutation) => mutation.addedNodes.length === 0))
-                return;
-              if (tryResolve()) observer.disconnect();
-            });
-            observer.observe(target, { childList: true, subtree: true });
-          });
-        }
-      };
-      return Object.freeze(o);
+      hhPlusPlusConfig.loadConfig();
+      hhPlusPlusConfig.runModules();
+      return true;
     }
     function PentaDrillSimModule() {
       return {
@@ -674,23 +728,23 @@
           { key: "preBattle", default: true, label: "Run on pre-battle page" },
           { key: "heavy", default: false, label: "Heavy simulation (slow)" }
         ],
-        async run(subSettings) {
-          if (subSettings.arena && Helpers.isCurrentPage("/penta-drill-arena.html")) {
-            await Async.beforeGameScriptsRun();
+        async run(settings) {
+          if (settings.arena && PagePath.startsWith("/penta-drill-arena.html")) {
+            await async_default.beforeGameScriptsRun();
             $(document.head).append(`<style>${sim_results_default}</style>`);
             const { player_datas, opponents_list } = window;
             if (player_datas == null || opponents_list == null) {
               console.log("Not found", { player_datas, opponents_list });
               return;
             }
-            const numSimulation = subSettings.heavy ? 300 : 100;
+            const numSimulation = settings.heavy ? 300 : 100;
             opponents_list.forEach(async (opponent) => {
               const expected = simulatePentaDrill2(
                 player_datas.team,
                 opponent.player.team,
                 numSimulation
               );
-              await Async.afterGameScriptsRun();
+              await async_default.afterGameScriptsRun();
               const $box = createSimResultsBox(expected);
               let $button = $(
                 `a[href$="id_opponent=${opponent.player.id_fighter}"]`
@@ -701,24 +755,29 @@
                 );
               }
               $button.parent().after($box);
+              await async_default.afterThirdpartyScriptsRun();
+              if ($box.parent().find("#perform_opponent").length > 0) {
+                $box.find(".pd-sim-right").css("right", 0);
+                $box.find(".pd-sim-left").css("left", 0);
+              }
             });
           }
-          if (Helpers.isCurrentPage("/penta-drill-pre-battle")) {
-            await Async.beforeGameScriptsRun();
+          if (PagePath.startsWith("/penta-drill-pre-battle")) {
+            await async_default.beforeGameScriptsRun();
             $(document.head).append(`<style>${sim_results_default}</style>`);
-            if (subSettings.preBattle) {
+            if (settings.preBattle) {
               const { hero_fighter, opponent_fighter } = window;
               if (hero_fighter == null || opponent_fighter == null) {
                 console.log("Not found", { hero_fighter, opponent_fighter });
                 return;
               }
-              const numSimulation = subSettings.heavy ? 1e3 : 100;
+              const numSimulation = settings.heavy ? 1e3 : 100;
               const expected = simulatePentaDrill(
                 hero_fighter,
                 opponent_fighter,
                 numSimulation
               );
-              await Async.afterGameScriptsRun();
+              await async_default.afterGameScriptsRun();
               const $box = createSimResultsBox(expected);
               $(".opponent_rewards").after($box);
             }
@@ -765,8 +824,9 @@
         label: "Add Resouce Bar on pre-battle page",
         default: true,
         async run() {
-          if (!Helpers.isCurrentPage("/penta-drill-pre-battle")) return;
-          await Async.beforeGameScriptsRun();
+          if (!PagePath.startsWith("/penta-drill-pre-battle")) return;
+          $(document.head).append(`<style>${add_resource_bar_default}</style>`);
+          await async_default.beforeGameScriptsRun();
           $(".penta-drill-pre-battle-container").append(
             `<div class="pd-sim-resource-box"><div class="energy_counter" type="drill" id="drill_energy"></div></div>`
           );
@@ -777,11 +837,24 @@
       return {
         label: "Make the skip button appear faster",
         default: true,
-        async run() {
-          if (!Helpers.isCurrentPage("/penta-drill-battle.html")) return;
-          await Async.beforeGameScriptsRun();
-          Helpers.onAjaxResponse(/action=do_battles_penta_drill/i, () => {
-            $(".skip-buttons-container").attr("style", "");
+        settings: [
+          {
+            key: "clickableSkipButton",
+            default: true,
+            label: "Skip button remains clickable even during skill triggering"
+          }
+        ],
+        async run(settings) {
+          if (!PagePath.startsWith("/penta-drill-battle.html")) return;
+          if (settings.clickableSkipButton) {
+            $(document.head).append(`<style>${clickable_skip_buttons_default}</style>`);
+          }
+          await async_default.beforeGameScriptsRun();
+          $(document).ajaxComplete((event, jqXHR, ajaxOptions) => {
+            if (!ajaxOptions.url?.startsWith("/ajax.php")) return;
+            if (ajaxOptions.data?.includes("action=do_battles_penta_drill")) {
+              $(".skip-buttons-container").attr("style", "");
+            }
           });
         }
       };
@@ -791,7 +864,7 @@
         label: "Compact battle rewards",
         default: true,
         async run() {
-          if (!Helpers.isCurrentPage("/penta-drill-battle.html")) return;
+          if (!PagePath.startsWith("/penta-drill-battle.html")) return;
           $(document.head).append(`<style>${compact_rewards_default}</style>`);
         }
       };
@@ -813,20 +886,20 @@
             label: "Add shortcut bar"
           }
         ],
-        async run(subSettings) {
-          if (!Helpers.isCurrentPage("/edit-penta-drill-team") && !Helpers.isCurrentPage("/edit-labyrinth-team.html"))
+        async run(settings) {
+          if (!PagePath.startsWith("/edit-penta-drill-team") && !PagePath.startsWith("/edit-labyrinth-team.html"))
             return;
-          if (subSettings.compactGrid) {
+          if (settings.compactGrid) {
             $(document.head).append(`<style>${compact_grid_default}</style>`);
           }
-          if (subSettings.tooltipOnLocked) {
+          if (settings.tooltipOnLocked) {
             $(document.head).append(`<style>${tooltip_on_locked_girl_default}</style>`);
           }
-          if (subSettings.shortcutBar) {
+          if (settings.shortcutBar) {
             $(document.head).append(`<style>${shortcut_bar_default}</style>`);
           }
-          await Async.beforeGameScriptsRun();
-          if (subSettings.shortcutBar) {
+          await async_default.beforeGameScriptsRun();
+          if (settings.shortcutBar) {
             const haremGirlsMap = {};
             const availableGirls = window.availableGirls;
             availableGirls.forEach((e) => {
