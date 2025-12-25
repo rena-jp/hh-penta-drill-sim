@@ -1,0 +1,35 @@
+{
+  "name": "hh-penta-drill-sim",
+  "version": "0.0.4",
+  "description": "Add Penta Drill simulator for Hentai Heroes",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "watch": "node ./build/watch.mjs",
+    "build": "node ./build/build.mjs",
+    "build-check": "npx tsc --noEmit",
+    "prettier": "prettier --write src",
+    "lint": "eslint src"
+  },
+  "author": "rena",
+  "devDependencies": {
+    "@eslint/css": "^0.14.1",
+    "@eslint/js": "^9.39.2",
+    "@types/jquery": "^3.5.33",
+    "browserslist": "^4.28.1",
+    "browserslist-to-esbuild": "^2.1.1",
+    "esbuild": "^0.27.2",
+    "eslint": "^9.39.2",
+    "eslint-config-prettier": "^10.1.8",
+    "eslint-plugin-compat": "^6.0.2",
+    "eslint-plugin-react": "^7.37.5",
+    "eslint-plugin-react-hooks": "^7.0.1",
+    "eslint-plugin-unused-imports": "^4.3.0",
+    "globals": "^16.5.0",
+    "preact": "^10.28.1",
+    "preact-render-to-string": "^6.6.4",
+    "prettier": "^3.7.4",
+    "typescript": "^5.9.3",
+    "typescript-eslint": "^8.50.1"
+  }
+}

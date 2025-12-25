@@ -1,0 +1,49 @@
+.pdsim-result-box {
+  position: relative;
+  width: 100%;
+  height: 0;
+
+  & .pdsim-result {
+    position: absolute;
+    width: max-content;
+    height: 0;
+    line-height: 1.25rem;
+    text-align: center;
+    text-shadow:
+      -1px -1px 0 #000,
+      -1px 1px 0 #000,
+      1px -1px 0 #000,
+      1px 1px 0 #000;
+    z-index: 1;
+
+    & .pdsim-label {
+      font-size: 0.75rem;
+    }
+
+    &.pdsim-pending {
+      color: #999;
+    }
+  }
+}
+
+.penta-drill-battle .pdsim-result-box .pdsim-result {
+  bottom: 3rem;
+  &.pdsim-right {
+    right: 0;
+  }
+
+  &.pdsim-left {
+    left: 0;
+  }
+}
+
+.opponent-info-container .pdsim-result-box .pdsim-result {
+  bottom: 3.5rem;
+  &.pdsim-right {
+    right: 10%;
+  }
+
+  &.pdsim-left {
+    left: 10%;
+  }
+}

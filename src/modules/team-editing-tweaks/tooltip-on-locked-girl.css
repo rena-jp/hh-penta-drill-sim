@@ -1,0 +1,9 @@
+body.page-edit-penta-drill-team
+  #edit-team-page.penta-drill
+  .harem-panel
+  .panel-body
+  .harem-panel-girls
+  .harem-girl-container:not(.selected)[team_slot]
+  .grey-overlay {
+  pointer-events: none;
+}

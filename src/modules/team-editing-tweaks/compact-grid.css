@@ -1,0 +1,10 @@
+body.page-edit-penta-drill-team .harem-panel .harem-panel-girls {
+  padding: 0;
+  grid-row-gap: 0;
+  grid-template-columns: repeat(5, 58px);
+}
+
+body.page-edit-penta-drill-team .harem-panel-girls .harem-girl-container {
+  width: 58px;
+  height: 80px;
+}

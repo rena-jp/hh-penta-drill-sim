@@ -1,0 +1,172 @@
+import type { MyModule } from '../../common/types';
+import { Page, Async, Style, Color } from '../../utils';
+import { simulatePentaDrill } from '../../simulator/simulator';
+import css from './style.css';
+import { render } from 'preact-render-to-string';
+import {
+  getTeamsFromFighters,
+  getTeamsFromGamePlayer,
+} from '../../common/data';
+
+export const PentaDrillSimModule: MyModule<
+  'arena' | 'preBattle' | 'heavy' | 'developer'
+> = {
+  key: 'PentaDrillSimModule',
+  label: 'Penta Drill Sim',
+  default: true,
+  settings: [
+    { key: 'arena', default: true, label: 'Run on table page' },
+    { key: 'preBattle', default: true, label: 'Run on pre-battle page' },
+    { key: 'heavy', default: false, label: 'Heavy simulation (slow)' },
+    { key: 'developer', default: true, label: 'Developer mode' },
+  ],
+  async run(settings) {
+    if (settings.arena && Page.startsWith('/penta-drill-arena.html')) {
+      Style.injectToHead(css);
+      await Async.afterDomContentLoaded();
+
+      const { player_datas, opponents_list } = window;
+      if (player_datas == null || opponents_list == null) {
+        console.log('Not found', { player_datas, opponents_list });
+        return;
+      }
+      const numSimulation = settings.heavy ? 300 : 100;
+      opponents_list.forEach((opponent) => {
+        void Async.run(async () => {
+          const heroTeams = getTeamsFromGamePlayer(player_datas);
+          const opponentTeams = getTeamsFromGamePlayer(opponent.player);
+          const expected = simulatePentaDrill(
+            heroTeams,
+            opponentTeams,
+            numSimulation,
+          );
+
+          await Async.afterGameScriptsRun();
+
+          const $box = createSimResultsBox(expected);
+          let $button = $(
+            `a[href$="id_opponent=${opponent.player.id_fighter}"]`,
+          );
+          if ($button.length === 0) {
+            $button = $(
+              `a[href*="id_opponent=${opponent.player.id_fighter}&"]`,
+            );
+          }
+          $button.parent().after($box);
+          await Async.afterThirdpartyScriptsRun();
+          if ($box.parent().find('#perform_opponent').length > 0) {
+            $box.find('.pdsim-right').css('right', 0);
+            $box.find('.pdsim-left').css('left', 0);
+          }
+        });
+      });
+
+      /*
+      await Async.afterGameScriptsRun();
+      $('.player-container .description-container')
+        .append(
+          render(
+            <img
+              src="https://hh2.hh-content.com/design/ic_books_gray.svg"
+              style={{
+                position: 'absolute',
+                top: '0.6rem',
+                right: '0.6rem',
+                width: '2.6rem',
+                height: '2.6rem',
+                cursor: 'pointer',
+              }}
+            />,
+          ),
+        )
+        .on('click', () => {
+          void Async.run(async () => {
+            // TODO
+          });
+        });
+      */
+    }
+
+    if (Page.startsWith('/penta-drill-pre-battle')) {
+      await Async.afterDomContentLoaded();
+
+      Style.injectToHead(css);
+
+      if (settings.preBattle) {
+        const { hero_fighter, opponent_fighter } = window;
+        if (hero_fighter == null || opponent_fighter == null) {
+          console.log('Not found', { hero_fighter, opponent_fighter });
+          return;
+        }
+
+        const numSimulation = settings.heavy ? 1000 : 100;
+        const heroTeams = getTeamsFromFighters(hero_fighter);
+        const opponentTeams = getTeamsFromFighters(opponent_fighter);
+        const expected = simulatePentaDrill(
+          heroTeams,
+          opponentTeams,
+          numSimulation,
+        );
+
+        await Async.afterGameScriptsRun();
+
+        const $box = createSimResultsBox(expected);
+        $('.opponent_rewards').after($box);
+      }
+    }
+
+    function createSimResultsBox(expected: {
+      points: number;
+      rounds: number;
+      pointTable: number[];
+      minRounds: number;
+      maxRounds: number;
+    }) {
+      const $box = $(render(<div className="pdsim-result-box"></div>));
+      const $left = $(render(<div className="pdsim-result pdsim-left"></div>))
+        .html(
+          render(
+            <>
+              <div className="pdsim-label">E[Points]:</div>
+              <span className="pdsim-points">{expected.points.toFixed(2)}</span>
+            </>,
+          ),
+        )
+        .attr(
+          'tooltip',
+          render(
+            <table>
+              {expected.pointTable
+                .map((e, i): [number, number] => [i, e])
+                .filter(([_, e]) => e > 0)
+                .map(([i, e]) => (
+                  <tr key={i} style={{ color: Color.getPDPointsColor(i) }}>
+                    <td>{i}</td>
+                    <td>:</td>
+                    <td>{(100 * e).toFixed(0)}%</td>
+                  </tr>
+                ))}
+            </table>,
+          ),
+        )
+        .css('color', Color.getPDPointsColor(expected.points));
+
+      const $right = $(render(<div className="pdsim-result pdsim-right"></div>))
+        .html(
+          render(
+            <>
+              <div className="pdsim-label">E[Rounds]:</div>
+              <span className="pdsim-rounds">{expected.rounds.toFixed(1)}</span>
+            </>,
+          ),
+        )
+        .attr('tooltip', `${expected.minRounds} - ${expected.maxRounds}`)
+        .css('color', Color.getRoundsColor(expected.maxRounds));
+
+      $box.append($left);
+      $box.append($right);
+
+      return $box;
+    }
+  },
+};

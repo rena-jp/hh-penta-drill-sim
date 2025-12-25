@@ -1,0 +1,28 @@
+body.page-penta-drill-battle {
+  .popup_wrapper
+    #rewards_popup
+    .flex-container
+    .rewards
+    .container
+    .scrolling_area,
+  .popup_wrapper
+    #rewards_popup
+    .flex-container
+    .rewards
+    .container
+    .rewards_scrollable,
+  .popup_wrapper #rewards_popup .flex-container .rewards .rewards_background {
+    max-height: unset;
+  }
+  #rewards_big_header:not(.losing) {
+    zoom: 0.4;
+  }
+  .popup_wrapper
+    #rewards_popup
+    .flex-container
+    .rewards
+    .container
+    .rewards_scrollable {
+    zoom: 0.65;
+  }
+}

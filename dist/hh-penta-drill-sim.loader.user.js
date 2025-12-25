@@ -14,6 +14,5 @@
 // @match        https://*.mangarpg.com/*
 // @grant        none
 // @run-at       document-body
-// @updateURL    https://github.com/rena-jp/hh-penta-drill-sim/raw/main/dist/hh-penta-drill-sim.dev.meta.js
-// @downloadURL  https://github.com/rena-jp/hh-penta-drill-sim/raw/main/dist/hh-penta-drill-sim.dev.user.js
+// @require      file:///D:/git/hh-penta-drill-sim/dist/hh-penta-drill-sim.dev.user.js
 // ==/UserScript==

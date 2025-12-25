@@ -1,0 +1,14 @@
+.pdsim-resource-box {
+  width: 100%;
+  height: 0;
+  position: relative;
+  #drill_energy {
+    position: absolute;
+    bottom: 6rem;
+    left: 38%;
+    right: 38%;
+    &.energy_counter span[rel="count_txt"] {
+      margin-top: 0;
+    }
+  }
+}

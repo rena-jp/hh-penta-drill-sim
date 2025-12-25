@@ -1,0 +1,41 @@
+#shortcut-bar-box {
+  position: absolute;
+  right: 408px;
+  width: fit-content;
+  display: flex;
+  flex-direction: row;
+  gap: 0.35rem;
+  padding: 0.7rem 1px 0.7rem 0.7rem;
+  border-radius: 0.7rem 0 0 0.7rem;
+  background-color: #4f222e;
+  z-index: 1;
+
+  .shortcut-bar {
+    display: flex;
+    flex-direction: column;
+
+    .check-btn.element-state {
+      width: 38px;
+      height: 38px;
+      padding: 0;
+    }
+
+    .check-btn.element-state .role-icn {
+      width: 36px;
+      height: 36px;
+      background-size: 27px;
+    }
+  }
+}
+
+@media (min-width: 1026px) {
+  #shortcut-bar-box {
+    top: 113px;
+  }
+}
+
+@media (max-width: 1025px) {
+  #shortcut-bar-box {
+    top: 134px;
+  }
+}
