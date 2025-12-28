@@ -47,13 +47,8 @@ Work in progress
 - [x] Sexomancer
 
 ## Known game issues
-
 - Pleasurelock is purely a visual effect only and does not affect match results.
-
 - Fluffer and Corkscrewer target the character with the lowest Ego value, not the lowest Ego percentage.
-
 - Fluffer's normal heal is unaffected by defense, but critical heal is reduced by defense.
-
 - The probability of Lovestruck (Playful) triggering is unknown.
-
 - Mana Boost (Exhibitionist) can exceed 100, but Mana Steal (Voyeur) never exceeds 100.

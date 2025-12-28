@@ -12,6 +12,7 @@ function simulate({ attacker, attackerTeam }: TurnParams) {
     if (!attacker.is_hero_fighter) {
       heal = Math.ceil(heal * 0.05);
     }
+    heal = Math.min(heal, target.initial_ego);
     target.remaining_ego += heal;
     if (target.remaining_ego > 0) target.is_defeated = false;
     attacker.remaining_mana -= 100;

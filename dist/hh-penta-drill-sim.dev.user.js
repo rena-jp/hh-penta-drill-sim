@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Hentai Heroes Penta Drill Sim
 // @namespace    https://github.com/rena-jp/hh-penta-drill-sim
-// @version      0.0.5
+// @version      0.0.6
 // @description  Add Penta Drill simulator for Hentai Heroes
 // @author       rena
 // @match        https://*.hentaiheroes.com/*
@@ -1304,6 +1304,7 @@
       if (!attacker.is_hero_fighter) {
         heal = Math.ceil(heal * 0.05);
       }
+      heal = Math.min(heal, target.initial_ego);
       target.remaining_ego += heal;
       if (target.remaining_ego > 0) target.is_defeated = false;
       attacker.remaining_mana -= 100;
