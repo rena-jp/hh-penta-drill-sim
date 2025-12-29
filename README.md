@@ -3,7 +3,7 @@
 Work in progress
 
 ## Install
-[https://raw.githubusercontent.com/rena-jp/hh-penta-drill-sim/main/dist/hh-penta-drill-sim.dev.user.js](https://raw.githubusercontent.com/rena-jp/hh-penta-drill-sim/main/dist/hh-penta-drill-sim.dev.user.js)
+[https://raw.githubusercontent.com/rena-jp/hh-penta-drill-sim/main/dist/hh-penta-drill-sim.user.js](https://raw.githubusercontent.com/rena-jp/hh-penta-drill-sim/main/dist/hh-penta-drill-sim.user.js)
 
 [hh-plus-plus](https://github.com/zoop0kemon/hh-plus-plus) required
 

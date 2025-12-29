@@ -1,6 +1,6 @@
 import esbuild from 'esbuild';
 import config from './config.mjs';
-import { metadata, metadataDev } from './metadata.mjs';
+import { metadata } from './metadata.mjs';
 
 const filename = metadata.match(/@downloadURL.+?([^/]+)\.user\.js/)[1];
 
@@ -8,7 +8,7 @@ const filename = metadata.match(/@downloadURL.+?([^/]+)\.user\.js/)[1];
   const ctx = await esbuild.context({
     ...config,
     banner: {
-      js: metadataDev,
+      js: metadata,
     },
     outfile: `./dist/${filename}.dev.user.js`,
     minify: false,

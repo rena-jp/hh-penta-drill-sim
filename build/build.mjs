@@ -1,11 +1,11 @@
 import fs from 'fs';
 import esbuild from 'esbuild';
 
-import { metadata, metadataDev, loader } from './metadata.mjs';
+import { metadata, loader } from './metadata.mjs';
 
 const filename = metadata.match(/@downloadURL.+?([^/]+)\.user\.js/)[1];
 fs.writeFileSync(`./dist/${filename}.meta.js`, metadata);
-fs.writeFileSync(`./dist/${filename}.dev.meta.js`, metadataDev);
+fs.writeFileSync(`./dist/${filename}.dev.meta.js`, metadata);
 fs.writeFileSync(`./dist/${filename}.loader.user.js`, loader);
 
 import config from './config.mjs';
@@ -13,7 +13,7 @@ import config from './config.mjs';
 esbuild.build({
   ...config,
   banner: {
-    js: metadataDev,
+    js: metadata,
   },
   outfile: `./dist/${filename}.dev.user.js`,
   minify: false,
@@ -26,7 +26,7 @@ esbuild.build({
     js: metadata,
   },
   outfile: `./dist/${filename}.user.js`,
-  minify: true,
+  minify: false,
   plugins: [cssPlugin()],
 });
 
