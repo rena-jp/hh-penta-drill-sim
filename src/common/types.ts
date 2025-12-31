@@ -214,10 +214,12 @@ export interface Player {
 }
 
 export interface Team {
+  id_member: number | null;
   girls: TeamGirl[];
 }
 
 export interface TeamGirl {
+  id_member: number;
   id_girl: number;
   battle_caracs: BattleCaracs;
   skills: [] | Record<number, { skill: GameSkill }>;
@@ -256,12 +258,12 @@ export interface Fighter {
 
 export interface FighterLog {
   id_fighter: number;
-  is_hero: boolean;
   team: Team[];
   fighters: FighterGirl[];
 }
 
 export interface FighterGirl {
+  id_fighter: number;
   id_girl: number;
   damage: number;
   defense: number;
@@ -290,7 +292,7 @@ export interface SimTeam {
   ids: number[];
   is_hero: boolean;
   list: SimGirl[];
-  map: Record<number, SimGirl>;
+  map: Record<string, SimGirl>;
   front: SimGirl[];
   middle: SimGirl[];
   back: SimGirl[];
@@ -315,7 +317,7 @@ export interface RoundGirl {
 }
 
 export interface RoundInitialGirl {
-  // id_fighter: number; // no use
+  id_fighter: number;
   id_girl: number;
   is_hero_fighter: boolean;
   damage: number;
@@ -337,6 +339,8 @@ export interface SimGirl extends RoundInitialGirl {
   speed: number;
   id_role: number;
   trigger_skill: GameSkill;
+  tier4_skill: number;
+  tier4_count: number;
   initial_defense: number;
   initial_ego: number;
   mana_starting: number;

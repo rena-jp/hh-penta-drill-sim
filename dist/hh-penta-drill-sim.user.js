@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Hentai Heroes Penta Drill Sim
 // @namespace    https://github.com/rena-jp/hh-penta-drill-sim
-// @version      0.0.7
+// @version      0.0.8
 // @description  Add Penta Drill simulator for Hentai Heroes
 // @author       rena
 // @match        https://*.hentaiheroes.com/*
@@ -1019,6 +1019,7 @@
   }
   function getGirlFromFighter(girl) {
     return {
+      id_fighter: girl.id_fighter,
       id_girl: girl.id_girl,
       is_hero_fighter: girl.is_hero_fighter,
       damage: girl.damage,
@@ -1026,6 +1027,8 @@
       chance: girl.chance,
       speed: girl.speed,
       id_role: girl.girl.girl.id_role,
+      tier4_skill: getSkill4(girl.girl),
+      tier4_count: 0,
       trigger_skill: girl.trigger_skill,
       initial_defense: girl.defense,
       initial_ego: girl.initial_ego,
@@ -1042,6 +1045,7 @@
   function getGirlFromTeamGirl(girl, isHero) {
     const caracs = girl.battle_caracs;
     return {
+      id_fighter: girl.id_member,
       id_girl: girl.id_girl,
       is_hero_fighter: isHero,
       damage: caracs.damage,
@@ -1049,7 +1053,9 @@
       chance: caracs.chance,
       speed: caracs.speed,
       id_role: girl.girl.id_role,
-      trigger_skill: getSkill(girl),
+      tier4_skill: getSkill4(girl),
+      tier4_count: 0,
+      trigger_skill: getSkill5(girl),
       initial_defense: caracs.defense,
       initial_ego: caracs.ego,
       mana_starting: caracs.mana_starting,
@@ -1062,7 +1068,10 @@
       stun_summary: 0
     };
   }
-  function getSkill(girl) {
+  function getSkill4(girl) {
+    return girl.skills[9]?.skill.percentage_value ?? 0;
+  }
+  function getSkill5(girl) {
     return [
       15,
       // darkness, Spank!, 'punch'
@@ -1107,10 +1116,11 @@
     girl.is_defeated = false;
     girl.burn_summary = [];
     girl.stun_summary = 0;
+    girl.tier4_count = 0;
   }
 
   // src/simulator/common.ts
-  function attack(defender, damage) {
+  function receiveDamage(defender, damage) {
     if (defender.total_shields_amount >= damage) {
       defender.total_shields_amount -= damage;
     } else {
@@ -1128,7 +1138,7 @@
     if (attacker.burn_summary.length > 0) {
       const burn = attacker.burn_summary[0];
       burn.rounds_left--;
-      attack(attacker, burn.damage);
+      receiveDamage(attacker, burn.damage);
       if (burn.rounds_left <= 0) {
         attacker.burn_summary.shift();
       }
@@ -1335,13 +1345,17 @@
   var shield_many_default = { simulate: simulate11, validate: validate11 };
 
   // src/simulator/skills/punch.ts
-  function simulate12({ attacker, defenderTeam }) {
+  function simulate12({ attacker, defenderTeam, teamSlot }) {
     const percentage = attacker.trigger_skill.percentage_value / 100;
     const targets = defenderTeam.list.filter((e2) => !e2.is_defeated);
     const defender = selectTargetFrom(targets);
-    let damage = Math.ceil(attacker.damage * percentage) - defender.defense;
+    let attackPower = attacker.damage;
+    if (teamSlot === 5 && attacker.tier4_skill > 0) {
+      attackPower *= (1 + attacker.tier4_skill / 100) ** attacker.tier4_count;
+    }
+    let damage = Math.ceil(attackPower * percentage) - defender.defense;
     damage = Math.max(0, damage);
-    attack(defender, damage);
+    receiveDamage(defender, damage);
     attacker.remaining_mana -= 100;
   }
   function validate12() {
@@ -1380,7 +1394,7 @@
     for (let i3 = 0; i3 < matches; i3++) {
       const heroTeam = heroTeams[i3];
       const opponentTeam = opponentTeams[i3];
-      const result = simulateMatch(heroTeam, opponentTeam, currentRounds);
+      const result = simulateMatch(heroTeam, opponentTeam, currentRounds, i3 + 1);
       points += result.points;
       sumRounds += result.rounds - currentRounds;
       currentRounds = result.rounds;
@@ -1388,21 +1402,23 @@
     }
     return { points, rounds: sumRounds };
   }
-  function simulateMatch(heroTeam, opponentTeam, startRounds) {
+  function simulateMatch(heroTeam, opponentTeam, startRounds, teamSlot) {
     const order = [
       ...opponentTeam.list.map((girl) => ({
         attacker: girl,
         attackerTeam: opponentTeam,
         defenderTeam: heroTeam,
         heroTeam,
-        opponentTeam
+        opponentTeam,
+        teamSlot
       })),
       ...heroTeam.list.map((girl) => ({
         attacker: girl,
         attackerTeam: heroTeam,
         defenderTeam: opponentTeam,
         heroTeam,
-        opponentTeam
+        opponentTeam,
+        teamSlot
       }))
     ];
     order.sort((x3, y3) => y3.attacker.speed - x3.attacker.speed);
@@ -1428,6 +1444,7 @@
   function simulateTurn(params) {
     const { attacker, attackerTeam, defenderTeam } = params;
     if (attacker.is_defeated) return { isOver: false };
+    attacker.tier4_count++;
     const { isStunned } = stun_default.simulate(params);
     if (!isStunned) {
       if (attacker.id_role === RoleId.Fluffer) {
@@ -1528,7 +1545,7 @@
         damage *= 2;
       }
     }
-    attack(defender, damage);
+    receiveDamage(defender, damage);
   }
 
   // src/modules/penta-drill-sim/style.css

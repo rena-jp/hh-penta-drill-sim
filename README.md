@@ -1,7 +1,5 @@
 # Hentai Heroes Penta Drill Simulator
 
-Work in progress
-
 ## Install
 [https://raw.githubusercontent.com/rena-jp/hh-penta-drill-sim/main/dist/hh-penta-drill-sim.user.js](https://raw.githubusercontent.com/rena-jp/hh-penta-drill-sim/main/dist/hh-penta-drill-sim.user.js)
 
@@ -47,8 +45,10 @@ Work in progress
 - [x] Sexomancer
 
 ## Known game issues
-- Pleasurelock is purely a visual effect only and does not affect match results.
+- Pleasurelock is purely a visual effect and does not affect match results.
 - Fluffer and Corkscrewer target the character with the lowest Ego value, not the lowest Ego percentage.
-- Fluffer's normal heal is unaffected by defense, but critical heal is reduced by defense.
+- Fluffer's normal heal is unaffected by defense, but its critical heal is reduced by defense.
 - The probability of Lovestruck (Playful) triggering is unknown.
-- Mana Boost (Exhibitionist) can exceed 100, but Mana Steal (Voyeur) never exceeds 100.
+- Mana Boost (Exhibitionist) can exceed 100, but Mana Steal (Voyeur) never does.
+- The Sexomancer skill may fail if Ego is negative.
+- The Tier 4 skill only increases the damage dealt by the Tier 5 skill of the fifth team.

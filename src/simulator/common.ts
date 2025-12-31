@@ -1,6 +1,6 @@
 import type { SimGirl, SimTeam } from '../common/types';
 
-export function attack(defender: SimGirl, damage: number) {
+export function receiveDamage(defender: SimGirl, damage: number) {
   if (defender.total_shields_amount >= damage) {
     defender.total_shields_amount -= damage;
   } else {

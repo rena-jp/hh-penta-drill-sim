@@ -1,6 +1,6 @@
 import { resetTeams } from '../common/data';
 import { RoleId, type SimTeam } from '../common/types';
-import { attack, getLowestEgoValue } from './common';
+import { receiveDamage, getLowestEgoValue } from './common';
 import { BurnEffect, ReassuranceEffect, StunEffect } from './effects';
 import { isCritical, selectTargetFrom } from './random';
 import {
@@ -52,7 +52,7 @@ export function simulateBattle(heroTeams: SimTeam[], opponentTeams: SimTeam[]) {
   for (let i = 0; i < matches; i++) {
     const heroTeam = heroTeams[i]!;
     const opponentTeam = opponentTeams[i]!;
-    const result = simulateMatch(heroTeam, opponentTeam, currentRounds);
+    const result = simulateMatch(heroTeam, opponentTeam, currentRounds, i + 1);
     points += result.points;
     sumRounds += result.rounds - currentRounds;
     currentRounds = result.rounds;
@@ -65,6 +65,7 @@ function simulateMatch(
   heroTeam: SimTeam,
   opponentTeam: SimTeam,
   startRounds: number,
+  teamSlot: number,
 ) {
   const order = [
     ...opponentTeam.list.map((girl) => ({
@@ -73,6 +74,7 @@ function simulateMatch(
       defenderTeam: heroTeam,
       heroTeam,
       opponentTeam,
+      teamSlot,
     })),
     ...heroTeam.list.map((girl) => ({
       attacker: girl,
@@ -80,6 +82,7 @@ function simulateMatch(
       defenderTeam: opponentTeam,
       heroTeam,
       opponentTeam,
+      teamSlot,
     })),
   ];
   order.sort((x, y) => y.attacker.speed - x.attacker.speed);
@@ -116,6 +119,7 @@ export function simulateRound(order: TurnParams[]): Progress {
 export function simulateTurn(params: TurnParams): Progress {
   const { attacker, attackerTeam, defenderTeam } = params;
   if (attacker.is_defeated) return { isOver: false };
+  attacker.tier4_count++;
 
   const { isStunned } = StunEffect.simulate(params);
   if (!isStunned) {
@@ -249,5 +253,5 @@ export function simulateAttack({ attacker, defenderTeam }: TurnParams) {
     }
   }
 
-  attack(defender, damage);
+  receiveDamage(defender, damage);
 }

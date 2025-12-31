@@ -53,6 +53,7 @@ function getTeamFromGameTeam(team: Team, isHero: boolean): SimTeam {
 
 export function getGirlFromFighter(girl: FighterGirl): SimGirl {
   return {
+    id_fighter: girl.id_fighter,
     id_girl: girl.id_girl,
     is_hero_fighter: girl.is_hero_fighter,
     damage: girl.damage,
@@ -60,6 +61,8 @@ export function getGirlFromFighter(girl: FighterGirl): SimGirl {
     chance: girl.chance,
     speed: girl.speed,
     id_role: girl.girl.girl.id_role,
+    tier4_skill: getSkill4(girl.girl),
+    tier4_count: 0,
     trigger_skill: girl.trigger_skill,
     initial_defense: girl.defense,
     initial_ego: girl.initial_ego,
@@ -77,6 +80,7 @@ export function getGirlFromFighter(girl: FighterGirl): SimGirl {
 export function getGirlFromTeamGirl(girl: TeamGirl, isHero: boolean): SimGirl {
   const caracs = girl.battle_caracs;
   return {
+    id_fighter: girl.id_member,
     id_girl: girl.id_girl,
     is_hero_fighter: isHero,
     damage: caracs.damage,
@@ -84,7 +88,9 @@ export function getGirlFromTeamGirl(girl: TeamGirl, isHero: boolean): SimGirl {
     chance: caracs.chance,
     speed: caracs.speed,
     id_role: girl.girl.id_role,
-    trigger_skill: getSkill(girl),
+    tier4_skill: getSkill4(girl),
+    tier4_count: 0,
+    trigger_skill: getSkill5(girl),
     initial_defense: caracs.defense,
     initial_ego: caracs.ego,
     mana_starting: caracs.mana_starting,
@@ -98,7 +104,11 @@ export function getGirlFromTeamGirl(girl: TeamGirl, isHero: boolean): SimGirl {
   };
 }
 
-function getSkill(girl: TeamGirl): GameSkill {
+function getSkill4(girl: TeamGirl): number {
+  return girl.skills[9]?.skill.percentage_value ?? 0;
+}
+
+function getSkill5(girl: TeamGirl): GameSkill {
   // Skill can be overridden by Sexomancer, Recovering a teammate, 'necro_revive'
   return (
     (
@@ -143,4 +153,5 @@ function resetGirl(girl: SimGirl) {
   girl.is_defeated = false;
   girl.burn_summary = [];
   girl.stun_summary = 0;
+  girl.tier4_count = 0;
 }
