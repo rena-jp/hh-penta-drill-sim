@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Hentai Heroes Penta Drill Sim
 // @namespace    https://github.com/rena-jp/hh-penta-drill-sim
-// @version      0.0.8
+// @version      0.0.9
 // @description  Add Penta Drill simulator for Hentai Heroes
 // @author       rena
 // @match        https://*.hentaiheroes.com/*
@@ -1191,7 +1191,7 @@
   function selectTargetsFrom(targets, maxCount) {
     if (targets.length <= maxCount) return targets;
     const ret = [];
-    Array(maxCount).keys().forEach(() => {
+    [...Array(maxCount)].forEach(() => {
       const i3 = Math.floor(Math.random() * targets.length);
       ret.push(targets[i3]);
       targets[i3] = targets[targets.length - 1];

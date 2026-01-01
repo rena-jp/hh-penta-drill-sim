@@ -80,6 +80,7 @@ export default defineConfig(
           },
         },
       ],
+      'compat/compat': 'warn',
     },
   },
   {
