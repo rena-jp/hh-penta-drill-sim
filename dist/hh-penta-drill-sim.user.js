@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Hentai Heroes Penta Drill Sim
 // @namespace    https://github.com/rena-jp/hh-penta-drill-sim
-// @version      0.0.10
+// @version      0.0.11
 // @description  Add Penta Drill simulator for Hentai Heroes
 // @author       rena
 // @match        https://*.hentaiheroes.com/*
@@ -1550,7 +1550,7 @@
   }
 
   // src/modules/penta-drill-sim/style.css
-  var style_default3 = ".pdsim-result-box {\n  position: relative;\n  width: 100%;\n  height: 0;\n}\n.pdsim-result-box .pdsim-result {\n  position: absolute;\n  width: max-content;\n  height: 0;\n  line-height: 1.25rem;\n  text-align: center;\n  text-shadow:\n    -1px -1px 0 #000,\n    -1px 1px 0 #000,\n    1px -1px 0 #000,\n    1px 1px 0 #000;\n  z-index: 1;\n}\n.pdsim-result-box .pdsim-result .pdsim-label {\n  font-size: 0.75rem;\n}\n.pdsim-result-box .pdsim-result.pdsim-pending {\n  color: #999;\n}\n.penta-drill-battle .pdsim-result-box .pdsim-result {\n  bottom: 3rem;\n}\n.penta-drill-battle .pdsim-result-box .pdsim-result.pdsim-right {\n  right: 0;\n}\n.penta-drill-battle .pdsim-result-box .pdsim-result.pdsim-left {\n  left: 0;\n}\n.opponent-info-container .pdsim-result-box .pdsim-result {\n  bottom: 3.5rem;\n}\n.opponent-info-container .pdsim-result-box .pdsim-result.pdsim-right {\n  right: 10%;\n}\n.opponent-info-container .pdsim-result-box .pdsim-result.pdsim-left {\n  left: 10%;\n}\n";
+  var style_default3 = ".pdsim-result-box {\n  position: relative;\n  width: 100%;\n  height: 0;\n}\n.pdsim-result-box .pdsim-result {\n  position: absolute;\n  width: max-content;\n  height: 0;\n  line-height: 1.25rem;\n  text-align: center;\n  text-shadow:\n    -1px -1px 0 #000,\n    -1px 1px 0 #000,\n    1px -1px 0 #000,\n    1px 1px 0 #000;\n  z-index: 1;\n}\n.pdsim-result-box .pdsim-result .pdsim-label {\n  font-size: 0.75rem;\n}\n.pdsim-result-box .pdsim-result.pdsim-pending {\n  color: #999;\n}\n.penta-drill-battle .pdsim-result-box .pdsim-result {\n  bottom: 3rem;\n}\n.penta-drill-battle .pdsim-result-box .pdsim-result.pdsim-right {\n  right: 0;\n}\n.penta-drill-battle .pdsim-result-box .pdsim-result.pdsim-left {\n  left: 0;\n}\n.opponent-info-container .pdsim-result-box .pdsim-result {\n  bottom: 3.5rem;\n}\n.opponent-info-container .pdsim-result-box .pdsim-result.pdsim-right {\n  right: 9%;\n}\n.opponent-info-container .pdsim-result-box .pdsim-result.pdsim-left {\n  left: 9%;\n}\n";
 
   // src/modules/penta-drill-sim/index.tsx
   var PentaDrillSimModule = {
@@ -1595,8 +1595,8 @@
             $button.parent().after($box);
             await async_exports.afterThirdpartyScriptsRun();
             if ($box.parent().find("#perform_opponent").length > 0) {
-              $box.find(".pdsim-right").css("right", 0);
-              $box.find(".pdsim-left").css("left", 0);
+              $box.find(".pdsim-right").css("right", "6%");
+              $box.find(".pdsim-left").css("left", "6%");
             }
           });
         });

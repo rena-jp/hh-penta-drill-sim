@@ -40,10 +40,10 @@
 .opponent-info-container .pdsim-result-box .pdsim-result {
   bottom: 3.5rem;
   &.pdsim-right {
-    right: 10%;
+    right: 9%;
   }
 
   &.pdsim-left {
-    left: 10%;
+    left: 9%;
   }
 }

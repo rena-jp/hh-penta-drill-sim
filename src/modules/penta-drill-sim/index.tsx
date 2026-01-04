@@ -55,8 +55,8 @@ export const PentaDrillSimModule: MyModule<
           $button.parent().after($box);
           await Async.afterThirdpartyScriptsRun();
           if ($box.parent().find('#perform_opponent').length > 0) {
-            $box.find('.pdsim-right').css('right', 0);
-            $box.find('.pdsim-left').css('left', 0);
+            $box.find('.pdsim-right').css('right', '6%');
+            $box.find('.pdsim-left').css('left', '6%');
           }
         });
       });
