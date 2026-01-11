@@ -1,3 +1,3 @@
 export function startsWith(searchString: string): boolean {
-  return window.location.pathname.startsWith(searchString);
+  return unsafeWindow.location.pathname.startsWith(searchString);
 }

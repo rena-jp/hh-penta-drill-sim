@@ -5,8 +5,8 @@
 
     "module": "esnext",
     "target": "esnext",
-    "types": ["jquery"],
-    "lib": ["ESNext", "DOM"],
+    "types": ["jquery", "tampermonkey"],
+    "lib": ["ESNext", "DOM", "DOM.Iterable", "WebWorker"],
 
     "sourceMap": true,
     "declaration": true,

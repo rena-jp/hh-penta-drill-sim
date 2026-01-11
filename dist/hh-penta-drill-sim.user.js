@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Hentai Heroes Penta Drill Sim
 // @namespace    https://github.com/rena-jp/hh-penta-drill-sim
-// @version      0.0.11
+// @version      0.0.12
 // @description  Add Penta Drill simulator for Hentai Heroes
 // @author       rena
 // @match        https://*.hentaiheroes.com/*
@@ -12,7 +12,8 @@
 // @match        https://*.transpornstarharem.com/*
 // @match        https://*.gaypornstarharem.com/*
 // @match        https://*.mangarpg.com/*
-// @grant        none
+// @grant        GM.getValue
+// @grant        GM.setValue
 // @run-at       document-body
 // @updateURL    https://raw.githubusercontent.com/rena-jp/hh-penta-drill-sim/main/dist/hh-penta-drill-sim.meta.js
 // @downloadURL  https://raw.githubusercontent.com/rena-jp/hh-penta-drill-sim/main/dist/hh-penta-drill-sim.user.js
@@ -27,6 +28,14 @@
   };
 
   // src/common/types.ts
+  var Rarities = [
+    "starting",
+    "common",
+    "rare",
+    "epic",
+    "legendary",
+    "mythic"
+  ];
   var Elements = [
     "darkness",
     "light",
@@ -37,7 +46,7 @@
     "stone",
     "sun"
   ];
-  var RoleIds = [1, 2, 3, 4, 5, 6, 9, 10];
+  var RoleIds = [4, 10, 9, 3, 1, 2, 5, 6];
   var RoleId = {
     Masochist: 1,
     Spermcaster: 2,
@@ -47,28 +56,6 @@
     Bugger: 6,
     Pleasurelock: 9,
     Sexomancer: 10
-  };
-  var SkillNameFromSkillType = {
-    punch: "Spank!",
-    heal_up: "Recovery",
-    mana_steal: "Mana Steal",
-    shield_many: "Shields Up",
-    burn: "Burnout!",
-    mana_boost: "Mana Boost",
-    defenses_up: "Reassurance",
-    stun_many: "Lovestruck",
-    light_punch: "No Skill",
-    necro_revive: "Sexomancer"
-  };
-  var SkillTypeFromElement = {
-    darkness: "punch",
-    light: "heal_up",
-    psychic: "mana_steal",
-    water: "shield_many",
-    fire: "burn",
-    nature: "mana_boost",
-    stone: "defenses_up",
-    sun: "stun_many"
   };
 
   // src/modules/index.ts
@@ -87,8 +74,8 @@
   var u;
   var t;
   var i;
-  var r;
   var o;
+  var r;
   var e;
   var f;
   var c;
@@ -98,8 +85,8 @@
   var p = {};
   var v = [];
   var y = /acit|ex(?:s|g|n|p|$)|rph|grid|ows|mnc|ntw|ine[ch]|zoo|^ord|itera/i;
-  var w = Array.isArray;
-  function d(n2, l3) {
+  var d = Array.isArray;
+  function w(n2, l3) {
     for (var u4 in l3) n2[u4] = l3[u4];
     return n2;
   }
@@ -107,14 +94,14 @@
     n2 && n2.parentNode && n2.parentNode.removeChild(n2);
   }
   function _(l3, u4, t2) {
-    var i3, r3, o3, e2 = {};
-    for (o3 in u4) "key" == o3 ? i3 = u4[o3] : "ref" == o3 ? r3 = u4[o3] : e2[o3] = u4[o3];
-    if (arguments.length > 2 && (e2.children = arguments.length > 3 ? n.call(arguments, 2) : t2), "function" == typeof l3 && null != l3.defaultProps) for (o3 in l3.defaultProps) void 0 === e2[o3] && (e2[o3] = l3.defaultProps[o3]);
-    return m(l3, e2, i3, r3, null);
+    var i3, o3, r3, e2 = {};
+    for (r3 in u4) "key" == r3 ? i3 = u4[r3] : "ref" == r3 ? o3 = u4[r3] : e2[r3] = u4[r3];
+    if (arguments.length > 2 && (e2.children = arguments.length > 3 ? n.call(arguments, 2) : t2), "function" == typeof l3 && null != l3.defaultProps) for (r3 in l3.defaultProps) void 0 === e2[r3] && (e2[r3] = l3.defaultProps[r3]);
+    return m(l3, e2, i3, o3, null);
   }
-  function m(n2, t2, i3, r3, o3) {
-    var e2 = { type: n2, props: t2, key: i3, ref: r3, __k: null, __: null, __b: 0, __e: null, __c: null, constructor: void 0, __v: null == o3 ? ++u : o3, __i: -1, __u: 0 };
-    return null == o3 && null != l.vnode && l.vnode(e2), e2;
+  function m(n2, t2, i3, o3, r3) {
+    var e2 = { type: n2, props: t2, key: i3, ref: o3, __k: null, __: null, __b: 0, __e: null, __c: null, constructor: void 0, __v: null == r3 ? ++u : r3, __i: -1, __u: 0 };
+    return null == r3 && null != l.vnode && l.vnode(e2), e2;
   }
   function k(n2) {
     return n2.children;
@@ -138,27 +125,27 @@
     }
   }
   function M(n2) {
-    (!n2.__d && (n2.__d = true) && i.push(n2) && !$2.__r++ || r != l.debounceRendering) && ((r = l.debounceRendering) || o)($2);
+    (!n2.__d && (n2.__d = true) && i.push(n2) && !$2.__r++ || o != l.debounceRendering) && ((o = l.debounceRendering) || r)($2);
   }
   function $2() {
-    for (var n2, u4, t2, r3, o3, f4, c3, s3 = 1; i.length; ) i.length > s3 && i.sort(e), n2 = i.shift(), s3 = i.length, n2.__d && (t2 = void 0, r3 = void 0, o3 = (r3 = (u4 = n2).__v).__e, f4 = [], c3 = [], u4.__P && ((t2 = d({}, r3)).__v = r3.__v + 1, l.vnode && l.vnode(t2), O(u4.__P, t2, r3, u4.__n, u4.__P.namespaceURI, 32 & r3.__u ? [o3] : null, f4, null == o3 ? S(r3) : o3, !!(32 & r3.__u), c3), t2.__v = r3.__v, t2.__.__k[t2.__i] = t2, N(f4, t2, c3), r3.__e = r3.__ = null, t2.__e != o3 && C(t2)));
+    for (var n2, u4, t2, o3, r3, f4, c3, s3 = 1; i.length; ) i.length > s3 && i.sort(e), n2 = i.shift(), s3 = i.length, n2.__d && (t2 = void 0, o3 = void 0, r3 = (o3 = (u4 = n2).__v).__e, f4 = [], c3 = [], u4.__P && ((t2 = w({}, o3)).__v = o3.__v + 1, l.vnode && l.vnode(t2), O(u4.__P, t2, o3, u4.__n, u4.__P.namespaceURI, 32 & o3.__u ? [r3] : null, f4, null == r3 ? S(o3) : r3, !!(32 & o3.__u), c3), t2.__v = o3.__v, t2.__.__k[t2.__i] = t2, N(f4, t2, c3), o3.__e = o3.__ = null, t2.__e != r3 && C(t2)));
     $2.__r = 0;
   }
-  function I(n2, l3, u4, t2, i3, r3, o3, e2, f4, c3, s3) {
-    var a3, h3, y3, w3, d3, g3, _3, m3 = t2 && t2.__k || v, b2 = l3.length;
-    for (f4 = P(u4, l3, m3, f4, b2), a3 = 0; a3 < b2; a3++) null != (y3 = u4.__k[a3]) && (h3 = -1 == y3.__i ? p : m3[y3.__i] || p, y3.__i = a3, g3 = O(n2, y3, h3, i3, r3, o3, e2, f4, c3, s3), w3 = y3.__e, y3.ref && h3.ref != y3.ref && (h3.ref && B(h3.ref, null, y3), s3.push(y3.ref, y3.__c || w3, y3)), null == d3 && null != w3 && (d3 = w3), (_3 = !!(4 & y3.__u)) || h3.__k === y3.__k ? f4 = A(y3, f4, n2, _3) : "function" == typeof y3.type && void 0 !== g3 ? f4 = g3 : w3 && (f4 = w3.nextSibling), y3.__u &= -7);
-    return u4.__e = d3, f4;
+  function I(n2, l3, u4, t2, i3, o3, r3, e2, f4, c3, s3) {
+    var a3, h3, y3, d3, w3, g3, _3, m3 = t2 && t2.__k || v, b2 = l3.length;
+    for (f4 = P(u4, l3, m3, f4, b2), a3 = 0; a3 < b2; a3++) null != (y3 = u4.__k[a3]) && (h3 = -1 == y3.__i ? p : m3[y3.__i] || p, y3.__i = a3, g3 = O(n2, y3, h3, i3, o3, r3, e2, f4, c3, s3), d3 = y3.__e, y3.ref && h3.ref != y3.ref && (h3.ref && B(h3.ref, null, y3), s3.push(y3.ref, y3.__c || d3, y3)), null == w3 && null != d3 && (w3 = d3), (_3 = !!(4 & y3.__u)) || h3.__k === y3.__k ? f4 = A(y3, f4, n2, _3) : "function" == typeof y3.type && void 0 !== g3 ? f4 = g3 : d3 && (f4 = d3.nextSibling), y3.__u &= -7);
+    return u4.__e = w3, f4;
   }
   function P(n2, l3, u4, t2, i3) {
-    var r3, o3, e2, f4, c3, s3 = u4.length, a3 = s3, h3 = 0;
-    for (n2.__k = new Array(i3), r3 = 0; r3 < i3; r3++) null != (o3 = l3[r3]) && "boolean" != typeof o3 && "function" != typeof o3 ? ("string" == typeof o3 || "number" == typeof o3 || "bigint" == typeof o3 || o3.constructor == String ? o3 = n2.__k[r3] = m(null, o3, null, null, null) : w(o3) ? o3 = n2.__k[r3] = m(k, { children: o3 }, null, null, null) : null == o3.constructor && o3.__b > 0 ? o3 = n2.__k[r3] = m(o3.type, o3.props, o3.key, o3.ref ? o3.ref : null, o3.__v) : n2.__k[r3] = o3, f4 = r3 + h3, o3.__ = n2, o3.__b = n2.__b + 1, e2 = null, -1 != (c3 = o3.__i = L(o3, u4, f4, a3)) && (a3--, (e2 = u4[c3]) && (e2.__u |= 2)), null == e2 || null == e2.__v ? (-1 == c3 && (i3 > s3 ? h3-- : i3 < s3 && h3++), "function" != typeof o3.type && (o3.__u |= 4)) : c3 != f4 && (c3 == f4 - 1 ? h3-- : c3 == f4 + 1 ? h3++ : (c3 > f4 ? h3-- : h3++, o3.__u |= 4))) : n2.__k[r3] = null;
-    if (a3) for (r3 = 0; r3 < s3; r3++) null != (e2 = u4[r3]) && 0 == (2 & e2.__u) && (e2.__e == t2 && (t2 = S(e2)), D(e2, e2));
+    var o3, r3, e2, f4, c3, s3 = u4.length, a3 = s3, h3 = 0;
+    for (n2.__k = new Array(i3), o3 = 0; o3 < i3; o3++) null != (r3 = l3[o3]) && "boolean" != typeof r3 && "function" != typeof r3 ? ("string" == typeof r3 || "number" == typeof r3 || "bigint" == typeof r3 || r3.constructor == String ? r3 = n2.__k[o3] = m(null, r3, null, null, null) : d(r3) ? r3 = n2.__k[o3] = m(k, { children: r3 }, null, null, null) : void 0 === r3.constructor && r3.__b > 0 ? r3 = n2.__k[o3] = m(r3.type, r3.props, r3.key, r3.ref ? r3.ref : null, r3.__v) : n2.__k[o3] = r3, f4 = o3 + h3, r3.__ = n2, r3.__b = n2.__b + 1, e2 = null, -1 != (c3 = r3.__i = L(r3, u4, f4, a3)) && (a3--, (e2 = u4[c3]) && (e2.__u |= 2)), null == e2 || null == e2.__v ? (-1 == c3 && (i3 > s3 ? h3-- : i3 < s3 && h3++), "function" != typeof r3.type && (r3.__u |= 4)) : c3 != f4 && (c3 == f4 - 1 ? h3-- : c3 == f4 + 1 ? h3++ : (c3 > f4 ? h3-- : h3++, r3.__u |= 4))) : n2.__k[o3] = null;
+    if (a3) for (o3 = 0; o3 < s3; o3++) null != (e2 = u4[o3]) && 0 == (2 & e2.__u) && (e2.__e == t2 && (t2 = S(e2)), D(e2, e2));
     return t2;
   }
   function A(n2, l3, u4, t2) {
-    var i3, r3;
+    var i3, o3;
     if ("function" == typeof n2.type) {
-      for (i3 = n2.__k, r3 = 0; i3 && r3 < i3.length; r3++) i3[r3] && (i3[r3].__ = n2, l3 = A(i3[r3], l3, u4, t2));
+      for (i3 = n2.__k, o3 = 0; i3 && o3 < i3.length; o3++) i3[o3] && (i3[o3].__ = n2, l3 = A(i3[o3], l3, u4, t2));
       return l3;
     }
     n2.__e != l3 && (t2 && (l3 && n2.type && !l3.parentNode && (l3 = S(n2)), u4.insertBefore(n2.__e, l3 || null)), l3 = n2.__e);
@@ -168,10 +155,10 @@
     return l3;
   }
   function L(n2, l3, u4, t2) {
-    var i3, r3, o3, e2 = n2.key, f4 = n2.type, c3 = l3[u4], s3 = null != c3 && 0 == (2 & c3.__u);
+    var i3, o3, r3, e2 = n2.key, f4 = n2.type, c3 = l3[u4], s3 = null != c3 && 0 == (2 & c3.__u);
     if (null === c3 && null == e2 || s3 && e2 == c3.key && f4 == c3.type) return u4;
     if (t2 > (s3 ? 1 : 0)) {
-      for (i3 = u4 - 1, r3 = u4 + 1; i3 >= 0 || r3 < l3.length; ) if (null != (c3 = l3[o3 = i3 >= 0 ? i3-- : r3++]) && 0 == (2 & c3.__u) && e2 == c3.key && f4 == c3.type) return o3;
+      for (i3 = u4 - 1, o3 = u4 + 1; i3 >= 0 || o3 < l3.length; ) if (null != (c3 = l3[r3 = i3 >= 0 ? i3-- : o3++]) && 0 == (2 & c3.__u) && e2 == c3.key && f4 == c3.type) return r3;
     }
     return -1;
   }
@@ -179,13 +166,13 @@
     "-" == l3[0] ? n2.setProperty(l3, null == u4 ? "" : u4) : n2[l3] = null == u4 ? "" : "number" != typeof u4 || y.test(l3) ? u4 : u4 + "px";
   }
   function j(n2, l3, u4, t2, i3) {
-    var r3, o3;
+    var o3, r3;
     n: if ("style" == l3) if ("string" == typeof u4) n2.style.cssText = u4;
     else {
       if ("string" == typeof t2 && (n2.style.cssText = t2 = ""), t2) for (l3 in t2) u4 && l3 in u4 || T(n2.style, l3, "");
       if (u4) for (l3 in u4) t2 && u4[l3] == t2[l3] || T(n2.style, l3, u4[l3]);
     }
-    else if ("o" == l3[0] && "n" == l3[1]) r3 = l3 != (l3 = l3.replace(f, "$1")), o3 = l3.toLowerCase(), l3 = o3 in n2 || "onFocusOut" == l3 || "onFocusIn" == l3 ? o3.slice(2) : l3.slice(2), n2.l || (n2.l = {}), n2.l[l3 + r3] = u4, u4 ? t2 ? u4.u = t2.u : (u4.u = c, n2.addEventListener(l3, r3 ? a : s, r3)) : n2.removeEventListener(l3, r3 ? a : s, r3);
+    else if ("o" == l3[0] && "n" == l3[1]) o3 = l3 != (l3 = l3.replace(f, "$1")), r3 = l3.toLowerCase(), l3 = r3 in n2 || "onFocusOut" == l3 || "onFocusIn" == l3 ? r3.slice(2) : l3.slice(2), n2.l || (n2.l = {}), n2.l[l3 + o3] = u4, u4 ? t2 ? u4.u = t2.u : (u4.u = c, n2.addEventListener(l3, o3 ? a : s, o3)) : n2.removeEventListener(l3, o3 ? a : s, o3);
     else {
       if ("http://www.w3.org/2000/svg" == i3) l3 = l3.replace(/xlink(H|:h)/, "h").replace(/sName$/, "s");
       else if ("width" != l3 && "height" != l3 && "href" != l3 && "list" != l3 && "form" != l3 && "tabIndex" != l3 && "download" != l3 && "rowSpan" != l3 && "colSpan" != l3 && "role" != l3 && "popover" != l3 && l3 in n2) try {
@@ -206,12 +193,12 @@
       }
     };
   }
-  function O(n2, u4, t2, i3, r3, o3, e2, f4, c3, s3) {
+  function O(n2, u4, t2, i3, o3, r3, e2, f4, c3, s3) {
     var a3, h3, p3, v3, y3, _3, m3, b2, S2, C3, M3, $4, P3, A3, H2, L2, T2, j2 = u4.type;
-    if (null != u4.constructor) return null;
-    128 & t2.__u && (c3 = !!(32 & t2.__u), o3 = [f4 = u4.__e = t2.__e]), (a3 = l.__b) && a3(u4);
+    if (void 0 !== u4.constructor) return null;
+    128 & t2.__u && (c3 = !!(32 & t2.__u), r3 = [f4 = u4.__e = t2.__e]), (a3 = l.__b) && a3(u4);
     n: if ("function" == typeof j2) try {
-      if (b2 = u4.props, S2 = "prototype" in j2 && j2.prototype.render, C3 = (a3 = j2.contextType) && i3[a3.__c], M3 = a3 ? C3 ? C3.props.value : a3.__ : i3, t2.__c ? m3 = (h3 = u4.__c = t2.__c).__ = h3.__E : (S2 ? u4.__c = h3 = new j2(b2, M3) : (u4.__c = h3 = new x(b2, M3), h3.constructor = j2, h3.render = E), C3 && C3.sub(h3), h3.state || (h3.state = {}), h3.__n = i3, p3 = h3.__d = true, h3.__h = [], h3._sb = []), S2 && null == h3.__s && (h3.__s = h3.state), S2 && null != j2.getDerivedStateFromProps && (h3.__s == h3.state && (h3.__s = d({}, h3.__s)), d(h3.__s, j2.getDerivedStateFromProps(b2, h3.__s))), v3 = h3.props, y3 = h3.state, h3.__v = u4, p3) S2 && null == j2.getDerivedStateFromProps && null != h3.componentWillMount && h3.componentWillMount(), S2 && null != h3.componentDidMount && h3.__h.push(h3.componentDidMount);
+      if (b2 = u4.props, S2 = "prototype" in j2 && j2.prototype.render, C3 = (a3 = j2.contextType) && i3[a3.__c], M3 = a3 ? C3 ? C3.props.value : a3.__ : i3, t2.__c ? m3 = (h3 = u4.__c = t2.__c).__ = h3.__E : (S2 ? u4.__c = h3 = new j2(b2, M3) : (u4.__c = h3 = new x(b2, M3), h3.constructor = j2, h3.render = E), C3 && C3.sub(h3), h3.state || (h3.state = {}), h3.__n = i3, p3 = h3.__d = true, h3.__h = [], h3._sb = []), S2 && null == h3.__s && (h3.__s = h3.state), S2 && null != j2.getDerivedStateFromProps && (h3.__s == h3.state && (h3.__s = w({}, h3.__s)), w(h3.__s, j2.getDerivedStateFromProps(b2, h3.__s))), v3 = h3.props, y3 = h3.state, h3.__v = u4, p3) S2 && null == j2.getDerivedStateFromProps && null != h3.componentWillMount && h3.componentWillMount(), S2 && null != h3.componentDidMount && h3.__h.push(h3.componentDidMount);
       else {
         if (S2 && null == j2.getDerivedStateFromProps && b2 !== v3 && null != h3.componentWillReceiveProps && h3.componentWillReceiveProps(b2, M3), u4.__v == t2.__v || !h3.__e && null != h3.shouldComponentUpdate && false === h3.shouldComponentUpdate(b2, h3.__s, M3)) {
           for (u4.__v != t2.__v && (h3.props = b2, h3.state = h3.__s, h3.__d = false), u4.__e = t2.__e, u4.__k = t2.__k, u4.__k.some(function(n3) {
@@ -230,19 +217,19 @@
       } else do {
         h3.__d = false, P3 && P3(u4), a3 = h3.render(h3.props, h3.state, h3.context), h3.state = h3.__s;
       } while (h3.__d && ++A3 < 25);
-      h3.state = h3.__s, null != h3.getChildContext && (i3 = d(d({}, i3), h3.getChildContext())), S2 && !p3 && null != h3.getSnapshotBeforeUpdate && (_3 = h3.getSnapshotBeforeUpdate(v3, y3)), L2 = a3, null != a3 && a3.type === k && null == a3.key && (L2 = V(a3.props.children)), f4 = I(n2, w(L2) ? L2 : [L2], u4, t2, i3, r3, o3, e2, f4, c3, s3), h3.base = u4.__e, u4.__u &= -161, h3.__h.length && e2.push(h3), m3 && (h3.__E = h3.__ = null);
+      h3.state = h3.__s, null != h3.getChildContext && (i3 = w(w({}, i3), h3.getChildContext())), S2 && !p3 && null != h3.getSnapshotBeforeUpdate && (_3 = h3.getSnapshotBeforeUpdate(v3, y3)), L2 = a3, null != a3 && a3.type === k && null == a3.key && (L2 = V(a3.props.children)), f4 = I(n2, d(L2) ? L2 : [L2], u4, t2, i3, o3, r3, e2, f4, c3, s3), h3.base = u4.__e, u4.__u &= -161, h3.__h.length && e2.push(h3), m3 && (h3.__E = h3.__ = null);
     } catch (n3) {
-      if (u4.__v = null, c3 || null != o3) if (n3.then) {
+      if (u4.__v = null, c3 || null != r3) if (n3.then) {
         for (u4.__u |= c3 ? 160 : 128; f4 && 8 == f4.nodeType && f4.nextSibling; ) f4 = f4.nextSibling;
-        o3[o3.indexOf(f4)] = null, u4.__e = f4;
+        r3[r3.indexOf(f4)] = null, u4.__e = f4;
       } else {
-        for (T2 = o3.length; T2--; ) g(o3[T2]);
+        for (T2 = r3.length; T2--; ) g(r3[T2]);
         z(u4);
       }
       else u4.__e = t2.__e, u4.__k = t2.__k, n3.then || z(u4);
       l.__e(n3, u4, t2);
     }
-    else null == o3 && u4.__v == t2.__v ? (u4.__k = t2.__k, u4.__e = t2.__e) : f4 = u4.__e = q(t2.__e, u4, t2, i3, r3, o3, e2, c3, s3);
+    else null == r3 && u4.__v == t2.__v ? (u4.__k = t2.__k, u4.__e = t2.__e) : f4 = u4.__e = q(t2.__e, u4, t2, i3, o3, r3, e2, c3, s3);
     return (a3 = l.diffed) && a3(u4), 128 & u4.__u ? void 0 : f4;
   }
   function z(n2) {
@@ -261,33 +248,33 @@
     });
   }
   function V(n2) {
-    return "object" != typeof n2 || null == n2 || n2.__b && n2.__b > 0 ? n2 : w(n2) ? n2.map(V) : d({}, n2);
+    return "object" != typeof n2 || null == n2 || n2.__b && n2.__b > 0 ? n2 : d(n2) ? n2.map(V) : w({}, n2);
   }
-  function q(u4, t2, i3, r3, o3, e2, f4, c3, s3) {
-    var a3, h3, v3, y3, d3, _3, m3, b2 = i3.props || p, k3 = t2.props, x3 = t2.type;
-    if ("svg" == x3 ? o3 = "http://www.w3.org/2000/svg" : "math" == x3 ? o3 = "http://www.w3.org/1998/Math/MathML" : o3 || (o3 = "http://www.w3.org/1999/xhtml"), null != e2) {
-      for (a3 = 0; a3 < e2.length; a3++) if ((d3 = e2[a3]) && "setAttribute" in d3 == !!x3 && (x3 ? d3.localName == x3 : 3 == d3.nodeType)) {
-        u4 = d3, e2[a3] = null;
+  function q(u4, t2, i3, o3, r3, e2, f4, c3, s3) {
+    var a3, h3, v3, y3, w3, _3, m3, b2 = i3.props || p, k3 = t2.props, x3 = t2.type;
+    if ("svg" == x3 ? r3 = "http://www.w3.org/2000/svg" : "math" == x3 ? r3 = "http://www.w3.org/1998/Math/MathML" : r3 || (r3 = "http://www.w3.org/1999/xhtml"), null != e2) {
+      for (a3 = 0; a3 < e2.length; a3++) if ((w3 = e2[a3]) && "setAttribute" in w3 == !!x3 && (x3 ? w3.localName == x3 : 3 == w3.nodeType)) {
+        u4 = w3, e2[a3] = null;
         break;
       }
     }
     if (null == u4) {
       if (null == x3) return document.createTextNode(k3);
-      u4 = document.createElementNS(o3, x3, k3.is && k3), c3 && (l.__m && l.__m(t2, e2), c3 = false), e2 = null;
+      u4 = document.createElementNS(r3, x3, k3.is && k3), c3 && (l.__m && l.__m(t2, e2), c3 = false), e2 = null;
     }
     if (null == x3) b2 === k3 || c3 && u4.data == k3 || (u4.data = k3);
     else {
-      if (e2 = e2 && n.call(u4.childNodes), !c3 && null != e2) for (b2 = {}, a3 = 0; a3 < u4.attributes.length; a3++) b2[(d3 = u4.attributes[a3]).name] = d3.value;
-      for (a3 in b2) if (d3 = b2[a3], "children" == a3) ;
-      else if ("dangerouslySetInnerHTML" == a3) v3 = d3;
+      if (e2 = e2 && n.call(u4.childNodes), !c3 && null != e2) for (b2 = {}, a3 = 0; a3 < u4.attributes.length; a3++) b2[(w3 = u4.attributes[a3]).name] = w3.value;
+      for (a3 in b2) if (w3 = b2[a3], "children" == a3) ;
+      else if ("dangerouslySetInnerHTML" == a3) v3 = w3;
       else if (!(a3 in k3)) {
         if ("value" == a3 && "defaultValue" in k3 || "checked" == a3 && "defaultChecked" in k3) continue;
-        j(u4, a3, null, d3, o3);
+        j(u4, a3, null, w3, r3);
       }
-      for (a3 in k3) d3 = k3[a3], "children" == a3 ? y3 = d3 : "dangerouslySetInnerHTML" == a3 ? h3 = d3 : "value" == a3 ? _3 = d3 : "checked" == a3 ? m3 = d3 : c3 && "function" != typeof d3 || b2[a3] === d3 || j(u4, a3, d3, b2[a3], o3);
+      for (a3 in k3) w3 = k3[a3], "children" == a3 ? y3 = w3 : "dangerouslySetInnerHTML" == a3 ? h3 = w3 : "value" == a3 ? _3 = w3 : "checked" == a3 ? m3 = w3 : c3 && "function" != typeof w3 || b2[a3] === w3 || j(u4, a3, w3, b2[a3], r3);
       if (h3) c3 || v3 && (h3.__html == v3.__html || h3.__html == u4.innerHTML) || (u4.innerHTML = h3.__html), t2.__k = [];
-      else if (v3 && (u4.innerHTML = ""), I("template" == t2.type ? u4.content : u4, w(y3) ? y3 : [y3], t2, i3, r3, "foreignObject" == x3 ? "http://www.w3.org/1999/xhtml" : o3, e2, f4, e2 ? e2[0] : i3.__k && S(i3, 0), c3, s3), null != e2) for (a3 = e2.length; a3--; ) g(e2[a3]);
-      c3 || (a3 = "value", "progress" == x3 && null == _3 ? u4.removeAttribute("value") : null != _3 && (_3 !== u4[a3] || "progress" == x3 && !_3 || "option" == x3 && _3 != b2[a3]) && j(u4, a3, _3, b2[a3], o3), a3 = "checked", null != m3 && m3 != u4[a3] && j(u4, a3, m3, b2[a3], o3));
+      else if (v3 && (u4.innerHTML = ""), I("template" == t2.type ? u4.content : u4, d(y3) ? y3 : [y3], t2, i3, o3, "foreignObject" == x3 ? "http://www.w3.org/1999/xhtml" : r3, e2, f4, e2 ? e2[0] : i3.__k && S(i3, 0), c3, s3), null != e2) for (a3 = e2.length; a3--; ) g(e2[a3]);
+      c3 || (a3 = "value", "progress" == x3 && null == _3 ? u4.removeAttribute("value") : null != _3 && (_3 !== u4[a3] || "progress" == x3 && !_3 || "option" == x3 && _3 != b2[a3]) && j(u4, a3, _3, b2[a3], r3), a3 = "checked", null != m3 && m3 != u4[a3] && j(u4, a3, m3, b2[a3], r3));
     }
     return u4;
   }
@@ -302,7 +289,7 @@
     }
   }
   function D(n2, u4, t2) {
-    var i3, r3;
+    var i3, o3;
     if (l.unmount && l.unmount(n2), (i3 = n2.ref) && (i3.current && i3.current != n2.__e || B(i3, null, u4)), null != (i3 = n2.__c)) {
       if (i3.componentWillUnmount) try {
         i3.componentWillUnmount();
@@ -311,27 +298,27 @@
       }
       i3.base = i3.__P = null;
     }
-    if (i3 = n2.__k) for (r3 = 0; r3 < i3.length; r3++) i3[r3] && D(i3[r3], u4, t2 || "function" != typeof n2.type);
+    if (i3 = n2.__k) for (o3 = 0; o3 < i3.length; o3++) i3[o3] && D(i3[o3], u4, t2 || "function" != typeof n2.type);
     t2 || g(n2.__e), n2.__c = n2.__ = n2.__e = void 0;
   }
   function E(n2, l3, u4) {
     return this.constructor(n2, u4);
   }
   n = v.slice, l = { __e: function(n2, l3, u4, t2) {
-    for (var i3, r3, o3; l3 = l3.__; ) if ((i3 = l3.__c) && !i3.__) try {
-      if ((r3 = i3.constructor) && null != r3.getDerivedStateFromError && (i3.setState(r3.getDerivedStateFromError(n2)), o3 = i3.__d), null != i3.componentDidCatch && (i3.componentDidCatch(n2, t2 || {}), o3 = i3.__d), o3) return i3.__E = i3;
+    for (var i3, o3, r3; l3 = l3.__; ) if ((i3 = l3.__c) && !i3.__) try {
+      if ((o3 = i3.constructor) && null != o3.getDerivedStateFromError && (i3.setState(o3.getDerivedStateFromError(n2)), r3 = i3.__d), null != i3.componentDidCatch && (i3.componentDidCatch(n2, t2 || {}), r3 = i3.__d), r3) return i3.__E = i3;
     } catch (l4) {
       n2 = l4;
     }
     throw n2;
   } }, u = 0, t = function(n2) {
-    return null != n2 && null == n2.constructor;
+    return null != n2 && void 0 === n2.constructor;
   }, x.prototype.setState = function(n2, l3) {
     var u4;
-    u4 = null != this.__s && this.__s != this.state ? this.__s : this.__s = d({}, this.state), "function" == typeof n2 && (n2 = n2(d({}, u4), this.props)), n2 && d(u4, n2), null != n2 && this.__v && (l3 && this._sb.push(l3), M(this));
+    u4 = null != this.__s && this.__s != this.state ? this.__s : this.__s = w({}, this.state), "function" == typeof n2 && (n2 = n2(w({}, u4), this.props)), n2 && w(u4, n2), null != n2 && this.__v && (l3 && this._sb.push(l3), M(this));
   }, x.prototype.forceUpdate = function(n2) {
     this.__v && (this.__e = true, n2 && this.__h.push(n2), M(this));
-  }, x.prototype.render = k, i = [], o = "function" == typeof Promise ? Promise.prototype.then.bind(Promise.resolve()) : setTimeout, e = function(n2, l3) {
+  }, x.prototype.render = k, i = [], r = "function" == typeof Promise ? Promise.prototype.then.bind(Promise.resolve()) : setTimeout, e = function(n2, l3) {
     return n2.__v.__b - l3.__v.__b;
   }, $2.__r = 0, f = /(PointerCapture)$|Capture$/i, c = 0, s = F(false), a = F(true), h = 0;
 
@@ -613,7 +600,7 @@
   });
   var DomContentLoaded = new Promise((resolve) => {
     if (document.readyState === "loading") {
-      window.addEventListener("DOMContentLoaded", () => resolve(), {
+      unsafeWindow.addEventListener("DOMContentLoaded", () => resolve(), {
         capture: true,
         once: true
       });
@@ -622,11 +609,11 @@
     }
   });
   var JQueryLoaded = new Promise((resolve) => {
-    if (window.$ != null) {
+    if (unsafeWindow.$ != null) {
       resolve();
     } else {
       void DomContentLoaded.then(() => {
-        if (window.$ != null) {
+        if (unsafeWindow.$ != null) {
           resolve();
         }
       });
@@ -666,13 +653,13 @@
     });
   }
   async function importHHPlusPlusConfig() {
-    if (window.hhPlusPlusConfig) return window.hhPlusPlusConfig;
+    if (unsafeWindow.hhPlusPlusConfig) return unsafeWindow.hhPlusPlusConfig;
     await afterDomContentLoaded();
-    if (window.hhPlusPlusConfig) return window.hhPlusPlusConfig;
+    if (unsafeWindow.hhPlusPlusConfig) return unsafeWindow.hhPlusPlusConfig;
     await afterGameScriptsRun();
-    if (window.hhPlusPlusConfig) return window.hhPlusPlusConfig;
+    if (unsafeWindow.hhPlusPlusConfig) return unsafeWindow.hhPlusPlusConfig;
     await afterThirdpartyScriptsRun();
-    return window.hhPlusPlusConfig;
+    return unsafeWindow.hhPlusPlusConfig;
   }
   function querySelector(target, selector) {
     return new Promise((resolve) => {
@@ -757,7 +744,7 @@
     startsWith: () => startsWith
   });
   function startsWith(searchString) {
-    return window.location.pathname.startsWith(searchString);
+    return unsafeWindow.location.pathname.startsWith(searchString);
   }
 
   // src/utils/style.ts
@@ -766,8 +753,39 @@
     injectToHead: () => injectToHead
   });
   function injectToHead(css) {
-    return $("<style />").addClass("pdsim-style").html(css).appendTo(document.head);
+    const head = document.head;
+    if (head == null) throw new Error("document.head not found");
+    const style = document.createElement("style");
+    style.classList.add("pdsim-style");
+    style.innerHTML = css;
+    head.append(style);
+    return style;
   }
+
+  // src/utils/storage.ts
+  function getStorageKey(key) {
+    const universe = unsafeWindow.HH_UNIVERSE;
+    const id = unsafeWindow.shared.Hero.infos.id;
+    return `${universe}-${id}-${key}`;
+  }
+  function getData(key, defaultValue) {
+    return GM.getValue(getStorageKey(key), defaultValue);
+  }
+  function setData(key, value) {
+    return GM.setValue(getStorageKey(key), value);
+  }
+  var ObjectDataPort = class {
+    constructor(key, defaultValue) {
+      this.key = key;
+      this.defaultValue = defaultValue;
+    }
+    async read() {
+      return { ...this.defaultValue, ...await getData(this.key) };
+    }
+    write(value) {
+      return setData(this.key, value);
+    }
+  };
 
   // src/modules/add-resoure-bar/style.css
   var style_default = ".pdsim-resource-box {\n  width: 100%;\n  height: 0;\n  position: relative;\n}\n.pdsim-resource-box #drill_energy {\n  position: absolute;\n  bottom: 6rem;\n  left: 38%;\n  right: 38%;\n}\n.pdsim-resource-box #drill_energy.energy_counter span[rel=count_txt] {\n  margin-top: 0;\n}\n";
@@ -852,20 +870,128 @@
     }
   };
 
-  // src/modules/team-editing-tweaks/compact-grid.css
-  var compact_grid_default = "body.page-edit-penta-drill-team .harem-panel .harem-panel-girls {\n  padding: 0;\n  grid-row-gap: 0;\n  grid-template-columns: repeat(5, 58px);\n}\nbody.page-edit-penta-drill-team .harem-panel-girls .harem-girl-container {\n  width: 58px;\n  height: 80px;\n}\n";
+  // src/modules/team-editing-tweaks/add-info.css
+  var add_info_default = "body[page=edit-penta-drill-team].page-edit-penta-drill-team > #contains_all > section > #edit-team-page.penta-drill .pdsim-level {\n  pointer-events: none;\n  position: absolute;\n  font-size: 11px;\n  line-height: 1;\n  background-color: #fff;\n  padding: 2px;\n}\nbody[page=edit-penta-drill-team].page-edit-penta-drill-team > #contains_all > section > #edit-team-page.penta-drill .pdsim-level.capped {\n  color: #c33;\n}\nbody[page=edit-penta-drill-team].page-edit-penta-drill-team > #contains_all > section > #edit-team-page.penta-drill .pdsim-level.uncapped {\n  color: #33c;\n}\nbody[page=edit-penta-drill-team].page-edit-penta-drill-team > #contains_all > section > #edit-team-page.penta-drill .pdsim-grade {\n  pointer-events: none;\n  position: absolute;\n}\nbody[page=edit-penta-drill-team].page-edit-penta-drill-team > #contains_all > section > #edit-team-page.penta-drill .pdsim-grade.new_girl_tooltip {\n  background: none;\n}\nbody[page=edit-penta-drill-team].page-edit-penta-drill-team > #contains_all > section > #edit-team-page.penta-drill .pdsim-grade.new_girl_tooltip .girl_tooltip_grade {\n  margin: 0;\n  line-height: 0;\n}\nbody[page=edit-penta-drill-team].page-edit-penta-drill-team > #contains_all > section > #edit-team-page.penta-drill .pdsim-grade.new_girl_tooltip .girl_tooltip_grade > g {\n  width: 8px;\n  height: 8px;\n  margin: 0;\n}\nbody[page=edit-penta-drill-team].page-edit-penta-drill-team > #contains_all > section > #edit-team-page.penta-drill .pdsim-class {\n  pointer-events: none;\n  position: absolute;\n}\nbody[page=edit-penta-drill-team].page-edit-penta-drill-team > #contains_all > section > #edit-team-page.penta-drill .pdsim-class::before {\n  display: block;\n  position: absolute;\n  background-position: center;\n  background-color: #fff;\n}\nbody[page=edit-penta-drill-team].page-edit-penta-drill-team > #contains_all > section > #edit-team-page.penta-drill .pdsim-role {\n  pointer-events: none;\n  position: absolute;\n  background-position: center;\n  background-color: #fff;\n}\nbody[page=edit-penta-drill-team].page-edit-penta-drill-team > #contains_all > section > #edit-team-page.penta-drill > .change-team-panel.player-panel .icon.hexagon-girl-element {\n  display: none;\n}\nbody[page=edit-penta-drill-team].page-edit-penta-drill-team > #contains_all > section > #edit-team-page.penta-drill > .change-team-panel.player-panel .pdsim-level {\n  top: 5px;\n  border-radius: 5px;\n}\nbody[page=edit-penta-drill-team].page-edit-penta-drill-team > #contains_all > section > #edit-team-page.penta-drill > .change-team-panel.player-panel .pdsim-grade.new_girl_tooltip {\n  bottom: 6px;\n}\nbody[page=edit-penta-drill-team].page-edit-penta-drill-team > #contains_all > section > #edit-team-page.penta-drill > .change-team-panel.player-panel .pdsim-class {\n  left: 0;\n  bottom: 12px;\n}\nbody[page=edit-penta-drill-team].page-edit-penta-drill-team > #contains_all > section > #edit-team-page.penta-drill > .change-team-panel.player-panel .pdsim-class::before {\n  left: 0;\n  bottom: 0;\n  width: 20px;\n  height: 20px;\n  background-size: 16px;\n  border-radius: 10px;\n}\nbody[page=edit-penta-drill-team].page-edit-penta-drill-team > #contains_all > section > #edit-team-page.penta-drill > .change-team-panel.player-panel .pdsim-role {\n  bottom: 12px;\n  right: 1px;\n  width: 20px;\n  height: 20px;\n  background-size: 16px;\n  border-radius: 10px;\n}\nbody[page=edit-penta-drill-team].page-edit-penta-drill-team > #contains_all > section > #edit-team-page.penta-drill > .change-team-panel.harem-panel .panel-body {\n  border-radius: 5px;\n}\nbody[page=edit-penta-drill-team].page-edit-penta-drill-team > #contains_all > section > #edit-team-page.penta-drill > .change-team-panel.harem-panel .panel-body .harem-panel-girls {\n  grid-row-gap: 0;\n}\nbody[page=edit-penta-drill-team].page-edit-penta-drill-team > #contains_all > section > #edit-team-page.penta-drill > .change-team-panel.harem-panel .panel-body .harem-panel-girls .harem-girl-container {\n  border-radius: 5px;\n  justify-content: start;\n  padding: 0 2px;\n}\nbody[page=edit-penta-drill-team].page-edit-penta-drill-team > #contains_all > section > #edit-team-page.penta-drill > .change-team-panel.harem-panel .panel-body .harem-panel-girls .harem-girl-container:not(.selected)[team_slot] .grey-overlay {\n  border-radius: 3px;\n  opacity: 0.6;\n}\nbody[page=edit-penta-drill-team].page-edit-penta-drill-team > #contains_all > section > #edit-team-page.penta-drill > .change-team-panel.harem-panel .panel-body .harem-panel-girls .harem-girl-container .girl_img {\n  border-radius: 5px;\n}\nbody[page=edit-penta-drill-team].page-edit-penta-drill-team > #contains_all > section > #edit-team-page.penta-drill > .change-team-panel.harem-panel .panel-body .harem-panel-girls .harem-girl-container .girl-element,\nbody[page=edit-penta-drill-team].page-edit-penta-drill-team > #contains_all > section > #edit-team-page.penta-drill > .change-team-panel.harem-panel .panel-body .harem-panel-girls .harem-girl-container .girl-power-icon {\n  display: none;\n}\nbody[page=edit-penta-drill-team].page-edit-penta-drill-team > #contains_all > section > #edit-team-page.penta-drill > .change-team-panel.harem-panel .panel-body .harem-panel-girls .pdsim-level {\n  top: 0;\n  right: 2px;\n  border-radius: 0 5px 0 5px;\n}\nbody[page=edit-penta-drill-team].page-edit-penta-drill-team > #contains_all > section > #edit-team-page.penta-drill > .change-team-panel.harem-panel .panel-body .harem-panel-girls .pdsim-grade.new_girl_tooltip {\n  bottom: 0;\n}\nbody[page=edit-penta-drill-team].page-edit-penta-drill-team > #contains_all > section > #edit-team-page.penta-drill > .change-team-panel.harem-panel .panel-body .harem-panel-girls .pdsim-class {\n  left: 2px;\n  bottom: 12px;\n}\nbody[page=edit-penta-drill-team].page-edit-penta-drill-team > #contains_all > section > #edit-team-page.penta-drill > .change-team-panel.harem-panel .panel-body .harem-panel-girls .pdsim-class::before {\n  left: 0;\n  bottom: 0;\n  width: 16px;\n  height: 16px;\n  background-size: 14px;\n  border-radius: 0 5px 0 5px;\n}\nbody[page=edit-penta-drill-team].page-edit-penta-drill-team > #contains_all > section > #edit-team-page.penta-drill > .change-team-panel.harem-panel .panel-body .harem-panel-girls .pdsim-role {\n  right: 2px;\n  bottom: 12px;\n  width: 16px;\n  height: 16px;\n  background-size: 14px;\n  border-radius: 5px 0 5px 0;\n}\nbody.page-edit-penta-drill-team > #contains_all > section > #edit-team-page.penta-drill > .change-team-panel.harem-panel > .panel-body > .harem-panel-girls > .harem-girl-container {\n  height: 78px;\n}\n";
 
-  // src/modules/team-editing-tweaks/shortcut-bar.css
-  var shortcut_bar_default = "#shortcut-bar-box {\n  position: absolute;\n  right: 408px;\n  width: fit-content;\n  display: flex;\n  flex-direction: row;\n  gap: 0.35rem;\n  padding: 0.7rem 1px 0.7rem 0.7rem;\n  border-radius: 0.7rem 0 0 0.7rem;\n  background-color: #4f222e;\n  z-index: 1;\n}\n#shortcut-bar-box .shortcut-bar {\n  display: flex;\n  flex-direction: column;\n}\n#shortcut-bar-box .shortcut-bar .check-btn.element-state {\n  width: 38px;\n  height: 38px;\n  padding: 0;\n}\n#shortcut-bar-box .shortcut-bar .check-btn.element-state .role-icn {\n  width: 36px;\n  height: 36px;\n  background-size: 27px;\n}\n@media (min-width: 1026px) {\n  #shortcut-bar-box {\n    top: 113px;\n  }\n}\n@media (max-width: 1025px) {\n  #shortcut-bar-box {\n    top: 134px;\n  }\n}\n";
+  // src/modules/team-editing-tweaks/aff-table.json
+  var aff_table_default = {
+    starting: [0, 90, 315, 878, 2003, 4253],
+    common: [0, 180, 630, 1755, 4005, 8505],
+    rare: [0, 540, 1890, 5265, 12015, 25515],
+    epic: [0, 1260, 4410, 12285, 28035, 59535],
+    legendary: [0, 1800, 6300, 17550, 40050, 85050],
+    mythic: [0, 4500, 15750, 43875, 100125, 212625, 437625]
+  };
+
+  // src/modules/team-editing-tweaks/compact-grid.css
+  var compact_grid_default = "body[page=edit-penta-drill-team].page-edit-penta-drill-team > #contains_all > section > #edit-team-page.penta-drill > .change-team-panel.harem-panel .panel-title {\n  height: 2.5rem;\n  margin-bottom: 0.5rem;\n}\nbody[page=edit-penta-drill-team].page-edit-penta-drill-team > #contains_all > section > #edit-team-page.penta-drill > .change-team-panel.harem-panel > .panel-body {\n  height: calc(100% - 3rem);\n  border-radius: 5px;\n}\nbody[page=edit-penta-drill-team].page-edit-penta-drill-team > #contains_all > section > #edit-team-page.penta-drill > .change-team-panel.harem-panel > .panel-body > .harem-panel-girls {\n  padding: 0;\n  grid-row-gap: 2px;\n  grid-template-columns: repeat(5, 58px);\n}\nbody[page=edit-penta-drill-team].page-edit-penta-drill-team > #contains_all > section > #edit-team-page.penta-drill > .change-team-panel.harem-panel > .panel-body > .harem-panel-girls > .harem-girl-container {\n  width: 56px;\n  height: 64px;\n  padding: 0 2px;\n  justify-content: start;\n}\nbody[page=edit-penta-drill-team].page-edit-penta-drill-team > #contains_all > section > #edit-team-page.penta-drill > .change-team-panel.harem-panel > .panel-body > .harem-panel-girls > .harem-girl-container .girl-power-icon {\n  font-size: 9px;\n  margin-top: 0;\n  width: 16px;\n  height: 12px;\n  background-size: 16px;\n  line-height: 12px;\n}\n";
+
+  // src/modules/team-editing-tweaks/filter.css
+  var filter_default = 'body.page-edit-penta-drill-team .harem-panel-girls .harem-girl-container {\n  transition: none;\n}\n.panel-filters {\n  display: none;\n}\n#arena_filter_box.panel-filters {\n  display: none;\n  white-space: nowrap;\n  position: absolute;\n  width: auto;\n  height: auto;\n}\n#arena_filter_box.panel-filters.panel-filters.visible-filters-panel {\n  display: block;\n}\n#arena_filter_box.panel-filters .form-wrapper {\n  display: grid;\n  grid-template-columns: 1fr 1fr;\n  grid-gap: 0 0.5rem;\n  width: 24rem;\n  margin-right: 0.5rem;\n}\n#arena_filter_box.panel-filters .form-wrapper > .form-control > .select-group .selectric-open {\n  z-index: unset;\n}\n#arena_filter_box.panel-filters .form-wrapper > .form-control > .select-group .selectric-items {\n  z-index: 20;\n  height: auto;\n}\n#arena_filter_box.panel-filters .form-wrapper > .form-control > .select-group .selectric-items li {\n  height: auto;\n  line-height: 1.5rem;\n  padding: 0.25rem 0.5rem;\n  display: flex;\n  align-items: center;\n}\n#arena_filter_box.panel-filters .form-wrapper > .form-control > .select-group .selectric-items li > span.clip {\n  width: unset;\n  height: unset;\n  float: unset;\n}\n#arena_filter_box.panel-filters .selectric-wrapper > .selectric > span.label {\n  display: flex;\n  align-items: center;\n}\n#arena_filter_box.panel-filters .selectric-wrapper > .selectric > span.label > span.clip {\n  overflow: hidden;\n  text-overflow: ellipsis;\n  width: 8.5rem;\n}\n#arena_filter_box.panel-filters span[carac] {\n  width: 1.5rem;\n  height: 1.5rem;\n  line-height: 1.5rem;\n}\n#arena_filter_box.panel-filters span[carac]::before {\n  width: 1.5rem;\n  height: 1.5rem;\n  margin-right: 0.25rem;\n}\n#arena_filter_box.panel-filters .girl-power-icon,\n#arena_filter_box.panel-filters .pdsim-selectric-icon {\n  height: 1.5rem;\n  width: 1.5rem;\n  background-size: contain;\n  background-position: center;\n  margin-right: 0.25rem;\n}\n:is(#arena_filter_box.panel-filters .girl-power-icon, #arena_filter_box.panel-filters .pdsim-selectric-icon).rarity-background {\n  border: 2px solid #fff;\n  border-radius: 4px;\n}\n:is(#arena_filter_box.panel-filters .girl-power-icon, #arena_filter_box.panel-filters .pdsim-selectric-icon).rarity-background:after {\n  line-height: 20px;\n  font-size: 14px;\n  position: absolute;\n  width: 20px;\n  height: 20px;\n  text-align: center;\n  color: white;\n  text-shadow:\n    1px -1px black,\n    1px 1px black,\n    -1px -1px black,\n    -1px 1px black,\n    0px -1px black,\n    0px 1px black,\n    -1px 0px black,\n    1px 0px black;\n}\n:is(#arena_filter_box.panel-filters .girl-power-icon, #arena_filter_box.panel-filters .pdsim-selectric-icon).rarity-background.starting:after {\n  content: "S";\n}\n:is(#arena_filter_box.panel-filters .girl-power-icon, #arena_filter_box.panel-filters .pdsim-selectric-icon).rarity-background.common:after {\n  content: "C";\n}\n:is(#arena_filter_box.panel-filters .girl-power-icon, #arena_filter_box.panel-filters .pdsim-selectric-icon).rarity-background.rare:after {\n  content: "R";\n}\n:is(#arena_filter_box.panel-filters .girl-power-icon, #arena_filter_box.panel-filters .pdsim-selectric-icon).rarity-background.epic:after {\n  content: "E";\n}\n:is(#arena_filter_box.panel-filters .girl-power-icon, #arena_filter_box.panel-filters .pdsim-selectric-icon).rarity-background.legendary:after {\n  content: "L";\n}\n:is(#arena_filter_box.panel-filters .girl-power-icon, #arena_filter_box.panel-filters .pdsim-selectric-icon).rarity-background.mythic:after {\n  content: "M";\n}\n#arena_filter_box.panel-filters .shortcut-bar {\n  width: auto;\n  margin: 0;\n  padding: 0.5rem 0.5rem 0 0;\n}\n#arena_filter_box.panel-filters .shortcut-bar .check-btn.element-state {\n  width: 38px;\n  height: 38px;\n  padding: 0;\n}\n#arena_filter_box.panel-filters .shortcut-bar .check-btn.element-state .role-icn {\n  width: 36px;\n  height: 36px;\n  background-size: 27px;\n}\n@media (min-width: 1026px) {\n  #arena_filter_box {\n    top: 8rem;\n  }\n}\n@media (max-width: 1025px) {\n  #arena_filter_box {\n    top: 9rem;\n  }\n}\n';
+
+  // src/modules/team-editing-tweaks/skip-outside.css
+  var skip_outside_default = "body[page=edit-penta-drill-team].page-edit-penta-drill-team > #contains_all > section > #edit-team-page.penta-drill > .change-team-panel.harem-panel > .panel-body > .harem-panel-girls > .harem-girl-container {\n  content-visibility: auto;\n}\n";
 
   // src/modules/team-editing-tweaks/tooltip-on-locked-girl.css
   var tooltip_on_locked_girl_default = "body.page-edit-penta-drill-team #edit-team-page.penta-drill .harem-panel .panel-body .harem-panel-girls .harem-girl-container:not(.selected)[team_slot] .grey-overlay {\n  pointer-events: none;\n}\n";
 
+  // src/modules/team-editing-tweaks/xp-table.json
+  var xp_table_default = {
+    starting: [
+      7359,
+      11265,
+      16928,
+      25146,
+      37077,
+      54402,
+      79562,
+      116109,
+      169196,
+      246320,
+      358361
+    ],
+    common: [
+      7359,
+      11265,
+      16928,
+      25146,
+      37077,
+      54402,
+      79562,
+      116109,
+      169196,
+      246320,
+      358361
+    ],
+    rare: [
+      8806,
+      13487,
+      20285,
+      30144,
+      44455,
+      65241,
+      95430,
+      139277,
+      202979,
+      295522,
+      429970
+    ],
+    epic: [
+      10255,
+      15714,
+      23632,
+      35126,
+      51821,
+      76066,
+      111279,
+      162431,
+      236740,
+      344704,
+      501554
+    ],
+    legendary: [
+      11703,
+      17936,
+      26984,
+      40119,
+      59191,
+      86896,
+      127137,
+      185595,
+      270519,
+      393897,
+      573149
+    ],
+    mythic: [
+      29073,
+      44622,
+      67203,
+      100007,
+      147659,
+      216880,
+      317447,
+      463551,
+      675825,
+      984238,
+      1432338
+    ]
+  };
+
   // src/modules/team-editing-tweaks/index.tsx
+  var filterDataPort = new ObjectDataPort("pd_filter", {
+    grade: "all",
+    sort: "power",
+    class: "all",
+    rarity: "all",
+    element: "all",
+    role: "all",
+    affection: "all",
+    level: "all"
+  });
   var TeamEditingTweaksModule = {
     key: "TeamEditingTweaksModule",
     label: "Team editing tweaks",
-    default: false,
+    default: true,
     settings: [
       { key: "compactGrid", default: true, label: "Compact grid" },
       {
@@ -874,108 +1000,514 @@
         label: "Show tooltip on locked girl"
       },
       {
-        key: "shortcutBar",
+        key: "overrideFilter",
         default: true,
-        label: "Add shortcut bar"
+        label: "Override Filter"
+      },
+      {
+        key: "lazyLoad",
+        default: true,
+        label: "Do not load girl icons until it is shown"
+      },
+      {
+        key: "showInfo",
+        default: true,
+        label: "Show Level, Grade, Class and Role"
+      },
+      {
+        key: "fixBugs",
+        default: true,
+        label: "Fix game bugs"
+      },
+      {
+        key: "skipOutside",
+        default: false,
+        label: "Stop drawing icons outside the screen (improve speed but cause flickering during scrolling)"
       }
     ],
     async run(settings) {
-      if (!page_exports.startsWith("/edit-penta-drill-team") && !page_exports.startsWith("/edit-labyrinth-team.html"))
+      if (!page_exports.startsWith("/edit-penta-drill-team")) {
         return;
+      }
+      if (settings.showInfo) {
+        style_exports.injectToHead(add_info_default);
+      }
       if (settings.compactGrid) {
         style_exports.injectToHead(compact_grid_default);
       }
       if (settings.tooltipOnLocked) {
         style_exports.injectToHead(tooltip_on_locked_girl_default);
       }
-      if (settings.shortcutBar) {
-        style_exports.injectToHead(shortcut_bar_default);
+      if (settings.overrideFilter) {
+        style_exports.injectToHead(filter_default);
+      }
+      if (settings.skipOutside) {
+        style_exports.injectToHead(skip_outside_default);
       }
       await async_exports.afterDomContentLoaded();
-      if (settings.shortcutBar) {
-        const girlMap = {};
-        const availableGirls = window.availableGirls;
-        availableGirls.forEach((e2) => {
-          girlMap[e2.id_girl] = e2;
-        });
-        const html = V2(
-          /* @__PURE__ */ u3("div", { id: "shortcut-bar-box", className: "checkbox-group", children: [
-            /* @__PURE__ */ u3("div", { className: "shortcut-bar skill", children: [
-              /* @__PURE__ */ u3(
-                "button",
-                {
-                  className: "check-btn element-state",
-                  value: "all",
-                  ...{ tooltip: "All" }
-                }
-              ),
-              Elements.map((e2, i3) => {
-                const skillType = SkillTypeFromElement[e2];
-                const skillName = SkillNameFromSkillType[skillType];
-                return /* @__PURE__ */ u3(
-                  "button",
-                  {
-                    className: "check-btn element-state",
-                    value: e2,
-                    ...{ tooltip: skillName },
-                    children: /* @__PURE__ */ u3("span", { className: `role-icn ${skillType}_icn` })
-                  },
-                  i3
-                );
-              })
-            ] }),
-            /* @__PURE__ */ u3("div", { className: "shortcut-bar role", children: [
-              /* @__PURE__ */ u3(
-                "button",
-                {
-                  className: "check-btn element-state",
-                  value: "all",
-                  ...{ tooltip: "All Roles" }
-                }
-              ),
-              RoleIds.map((roleId, i3) => /* @__PURE__ */ u3(
-                "button",
-                {
-                  className: "check-btn element-state",
-                  value: roleId,
-                  ...{ "role-tooltip": roleId },
-                  children: /* @__PURE__ */ u3("span", { className: `role-icn girl_role_${roleId}_icn` })
-                },
-                i3
-              ))
-            ] })
-          ] })
-        );
-        const panel = $(html);
-        panel.insertAfter(".change-team-panel.harem-panel");
-        panel.find(".role button.check-btn").each((_3, _e) => {
-          const e2 = _e;
-          const value = e2.value;
-          $(e2).on("click", () => {
-            let $roleFilter = $("select#filter_role");
-            if ($roleFilter.length === 0) $roleFilter = $('select[name="role"]');
-            $roleFilter.prop("value", value).selectric("refresh").change();
-          });
-        });
-        panel.find(".skill button.check-btn").each((_3, _e) => {
-          const e2 = _e;
-          const value = e2.value;
-          $(e2).on("click", () => {
-            let $elementFilter = $("select#filter_element");
-            if ($elementFilter.length === 0)
-              $elementFilter = $('select[name="element"]');
-            $elementFilter.prop("value", value).selectric("refresh").change();
-            const $skillTierFilter = $("select#filter_skill_tier");
-            if (value === "all") {
-              $skillTierFilter.prop("value", "all").selectric("refresh").change();
-            } else {
-              $skillTierFilter.prop("value", 5).selectric("refresh").change();
-            }
-          });
-        });
+      if (settings.overrideFilter) {
+        void overrideFilter(settings);
+      }
+      await async_exports.afterGameScriptsRun();
+      if (settings.showInfo || settings.fixBugs) {
+        showInfo(settings);
       }
     }
   };
+  function showInfo({
+    showInfo: showInfo2,
+    fixBugs
+  }) {
+    const girlDataMap = /* @__PURE__ */ new Map();
+    unsafeWindow.availableGirls.forEach((e2) => {
+      girlDataMap.set(Number(e2.id_girl), e2);
+    });
+    if (showInfo2) {
+      const girls = document.querySelectorAll(".harem-panel [id_girl]");
+      girls.forEach((e2) => {
+        const id = Number(e2.getAttribute("id_girl"));
+        appendInfo($(e2), id);
+      });
+    }
+    const container = document.querySelector(".change-team-panel.player-panel");
+    if (showInfo2) addInfoToHexagon(container);
+    const updatingObserver = new MutationObserver((mutations) => {
+      mutations.forEach((mutation) => {
+        const target = mutation.target;
+        updateInfo(target);
+      });
+    });
+    const updatingObserverOptions = {
+      attributes: true,
+      attributeFilter: ["data-new-girl-tooltip"]
+    };
+    const observe = (container2) => {
+      container2.querySelectorAll(".team-member-container .team-member img").forEach((e2) => {
+        updatingObserver.observe(e2, updatingObserverOptions);
+      });
+    };
+    if (showInfo2) observe(container);
+    const addingObserver = new MutationObserver((mutations) => {
+      if (mutations.every((mutation) => mutation.addedNodes.length === 0)) return;
+      if (fixBugs) {
+        unsafeWindow.all_teams.forEach((e2) => {
+          e2.girls = e2.girls.map((e3) => ({
+            ...e3,
+            ...girlDataMap.get(Number(e3.id_girl))
+          }));
+        });
+      }
+      if (showInfo2) addInfoToHexagon(container);
+      if (showInfo2) observe(mutations[0]?.target);
+    });
+    addingObserver.observe(container, { childList: true });
+    function addInfoToHexagon(container2) {
+      container2.querySelectorAll(
+        ".team-member-container .team-member img"
+      ).forEach((img) => {
+        const id = getIdFromImg(img);
+        const $container = $(img).closest(".team-member-container");
+        appendInfo($container, id);
+      });
+    }
+    function updateInfo(img) {
+      const id = getIdFromImg(img);
+      const $container = $(img).closest(".team-member-container");
+      appendInfo($container, id);
+    }
+    function appendInfo($container, id) {
+      const girl = girlDataMap.get(Number(id));
+      if (girl == null) return;
+      $container.find(".pdsim-level, .pdsim-grade, .pdsim-class, .pdsim-role").remove();
+      $container.append(getLevelHtml(girl));
+      $container.append(getGradeHtml(girl));
+      $container.append(getClassHtml(girl));
+      $container.append(getRoleHtml(girl));
+    }
+    function getIdFromImg(img) {
+      return Number(
+        img.getAttribute("src")?.match(/\/(\d+)\/(?:ico|grade_skins)/)?.[1]
+      );
+    }
+    function getLevelHtml(girl) {
+      const level = girl.level;
+      const capped = level >= 250 + 50 * girl.awakening_level;
+      return V2(
+        /* @__PURE__ */ u3("div", { className: `pdsim-level ${capped ? "capped" : "uncapped"}`, children: level })
+      );
+    }
+    function getGradeHtml(girl) {
+      const orange = girl.graded;
+      const green = girl.graded < girl.nb_grades && girl.affection >= aff_table_default[girl.rarity][girl.graded + 1] ? 1 : 0;
+      const grey = girl.nb_grades - orange - green;
+      return V2(
+        /* @__PURE__ */ u3("div", { className: "pdsim-grade new_girl_tooltip", children: /* @__PURE__ */ u3("div", { className: "girl_tooltip_grade", children: [
+          ...Array(orange).fill(/* @__PURE__ */ u3("g", {})),
+          ...Array(green).fill(/* @__PURE__ */ u3("g", { className: "green" })),
+          ...Array(grey).fill(/* @__PURE__ */ u3("g", { className: "grey" }))
+        ] }) })
+      );
+    }
+    function getClassHtml(girl) {
+      const classId = girl.class;
+      return V2(
+        /* @__PURE__ */ u3("div", { className: "pdsim-class", ...{ carac: classId }, children: " " })
+      );
+    }
+    function getRoleHtml(girl) {
+      const id_role = girl.id_role;
+      return V2(
+        /* @__PURE__ */ u3("div", { className: `pdsim-role girl_role_${id_role}_icn` })
+      );
+    }
+  }
+  async function overrideFilter({ lazyLoad }) {
+    const design = unsafeWindow.GT?.design;
+    if (design == null) throw new Error("window.GT.design not found");
+    const availableGirls = unsafeWindow.availableGirls;
+    if (availableGirls == null) throw new Error("availableGirls not found");
+    const girlDataMap = /* @__PURE__ */ new Map();
+    const girlDomMap = /* @__PURE__ */ new Map();
+    const girlIconMap = /* @__PURE__ */ new Map();
+    availableGirls.forEach((e2) => {
+      girlDataMap.set(Number(e2.id_girl), e2);
+    });
+    document.querySelectorAll(".harem-panel-girls > div[id_girl]").forEach((e2) => {
+      const id_girl = e2.getAttribute("id_girl");
+      girlDomMap.set(Number(id_girl), e2);
+    });
+    lazyLoad &&= typeof String.prototype.toImageUrl === "function";
+    if (lazyLoad) {
+      document.querySelectorAll(".harem-panel-girls > div[id_girl]").forEach((e2) => {
+        const id_girl = Number(e2.getAttribute("id_girl"));
+        e2.style.display = "none";
+        const img = e2.querySelector("img[girl-ico-src]");
+        if (img != null) {
+          girlIconMap.set(id_girl, {
+            img,
+            url: img.getAttribute("girl-ico-src")
+          });
+          img.removeAttribute("girl-ico-src");
+        }
+      });
+    }
+    const girlSorter = availableGirls.map((e2) => {
+      const caracs = e2.battle_caracs;
+      const ego = caracs.ego;
+      let damage = caracs.damage;
+      if (e2.id_role === RoleId.Dominator) damage *= 1.05;
+      if (e2.id_role === RoleId.Bugger) damage *= 0.8;
+      damage = Math.ceil(damage);
+      let defense = caracs.defense;
+      if (e2.id_role === RoleId.Masochist) defense *= 1.15;
+      defense = Math.ceil(defense);
+      const speed = caracs.speed;
+      const mana = e2.id_role === RoleId.Spermcaster ? 35 : 20;
+      const requiredXp = xp_table_default[e2.rarity][e2.awakening_level] - e2.xp;
+      const xp = requiredXp > 0 ? requiredXp : e2.awakening_level < 10 ? Math.min(0, e2.xp - xp_table_default[e2.rarity][e2.awakening_level + 1]) : Number.MIN_SAFE_INTEGER;
+      const requiredAffection = e2.graded < e2.nb_grades ? aff_table_default[e2.rarity][e2.graded + 1] - e2.affection : 0;
+      const affection = requiredAffection > 0 ? requiredAffection : e2.graded + 1 < e2.nb_grades ? Math.min(0, e2.affection - aff_table_default[e2.rarity][e2.graded + 2]) : Number.MIN_SAFE_INTEGER;
+      const power = Math.ceil(ego + 7.5 * (damage + defense) + 0.625 * speed);
+      return {
+        id_girl: e2.id_girl,
+        dom: girlDomMap.get(e2.id_girl),
+        power,
+        ego,
+        chance: caracs.chance,
+        damage,
+        defense,
+        speed,
+        starting_mana: caracs.mana_starting,
+        mana,
+        level_asc: -e2.level,
+        level_desc: e2.level,
+        xp,
+        affection
+      };
+    });
+    const settings = await filterDataPort.read();
+    const filterBox = /* @__PURE__ */ u3("div", { id: "arena_filter_box", className: "panel-filters", children: [
+      /* @__PURE__ */ u3("div", { className: "form-wrapper", children: [
+        /* @__PURE__ */ u3(
+          Selectric,
+          {
+            id: "filter_grade",
+            label: design.affection_category,
+            selected: settings.grade,
+            children: [
+              /* @__PURE__ */ u3(k, { children: design.selectors_All }, "all"),
+              /* @__PURE__ */ u3(k, { children: "★1" }, "1"),
+              /* @__PURE__ */ u3(k, { children: "★3" }, "3"),
+              /* @__PURE__ */ u3(k, { children: "★5" }, "5"),
+              /* @__PURE__ */ u3(k, { children: "★6" }, "6"),
+              /* @__PURE__ */ u3(k, { children: "★5, ★6" }, "11")
+            ]
+          }
+        ),
+        /* @__PURE__ */ u3(
+          Selectric,
+          {
+            id: "filter_sort",
+            label: design.haremdex_sort_by,
+            selected: settings.sort,
+            children: [
+              /* @__PURE__ */ u3(k, { children: [
+                /* @__PURE__ */ u3("span", { className: "girl-power-icon" }),
+                design.caracs_sum
+              ] }, "power"),
+              /* @__PURE__ */ u3("span", { ...{ carac: "ego" }, children: design.carac_ego }, "ego"),
+              /* @__PURE__ */ u3("span", { ...{ carac: "chance" }, children: design.carac_harmony }, "chance"),
+              /* @__PURE__ */ u3("span", { ...{ carac: "damage" }, children: design.damage }, "damage"),
+              /* @__PURE__ */ u3("span", { ...{ carac: "defense" }, children: design.carac_def }, "defense"),
+              /* @__PURE__ */ u3("span", { ...{ carac: "mana" }, children: design.carac_starting_mana }, "starting_mana"),
+              /* @__PURE__ */ u3("span", { ...{ carac: "mana-generation" }, children: design.carac_mana_generation }, "mana"),
+              /* @__PURE__ */ u3("span", { ...{ carac: "speed" }, children: design.pvp_battle_speed }, "speed"),
+              /* @__PURE__ */ u3(k, { children: [
+                design.Level,
+                " ▲"
+              ] }, "level_asc"),
+              /* @__PURE__ */ u3(k, { children: [
+                design.Level,
+                " ▼"
+              ] }, "level_desc"),
+              /* @__PURE__ */ u3("span", { className: "clip", children: [
+                design.XP,
+                " (",
+                design.pop_description,
+                ")"
+              ] }, "xp"),
+              /* @__PURE__ */ u3("span", { className: "clip", children: [
+                design.Affection,
+                " (",
+                design.pop_description,
+                ")"
+              ] }, "affection")
+            ]
+          }
+        ),
+        /* @__PURE__ */ u3(
+          Selectric,
+          {
+            id: "filter_element",
+            label: design.element,
+            selected: settings.element,
+            children: [
+              /* @__PURE__ */ u3(k, { children: design.selectors_All }, "all"),
+              Elements.map((e2) => /* @__PURE__ */ u3(k, { children: [
+                /* @__PURE__ */ u3("span", { className: `pdsim-selectric-icon ${e2}_element_icn` }),
+                design[`${e2}_flavor_element`]
+              ] }, e2))
+            ]
+          }
+        ),
+        /* @__PURE__ */ u3(
+          Selectric,
+          {
+            id: "filter_role",
+            label: design.girl_role,
+            selected: settings.role,
+            children: [
+              /* @__PURE__ */ u3(k, { children: design.selectors_All }, "all"),
+              RoleIds.map((e2) => /* @__PURE__ */ u3(k, { children: [
+                /* @__PURE__ */ u3(
+                  "span",
+                  {
+                    className: `pdsim-selectric-icon girl_role_${e2}_icn`,
+                    ...{ "role-tooltip": e2 }
+                  }
+                ),
+                design[`girl_role_${e2}_name`]
+              ] }, e2))
+            ]
+          }
+        ),
+        /* @__PURE__ */ u3(
+          Selectric,
+          {
+            id: "filter_class",
+            label: design.mythic_equipment_class,
+            selected: settings.class,
+            children: [
+              /* @__PURE__ */ u3(k, { children: design.selectors_All }, "all"),
+              /* @__PURE__ */ u3("span", { ...{ carac: "1" }, children: design.clubup_hardcore_stats_bonus }, "1"),
+              /* @__PURE__ */ u3("span", { ...{ carac: "2" }, children: design.clubup_charm_stats_bonus }, "2"),
+              /* @__PURE__ */ u3("span", { ...{ carac: "3" }, children: design.clubup_know_how_stats_bonus }, "3")
+            ]
+          }
+        ),
+        /* @__PURE__ */ u3(
+          Selectric,
+          {
+            id: "filter_rarity",
+            label: design.selectors_Rarity,
+            selected: settings.rarity,
+            children: [
+              /* @__PURE__ */ u3(k, { children: design.selectors_All }, "all"),
+              Rarities.map((e2) => /* @__PURE__ */ u3(k, { children: [
+                /* @__PURE__ */ u3(
+                  "span",
+                  {
+                    className: `pdsim-selectric-icon rarity-background ${e2}`
+                  }
+                ),
+                design[`girls_rarity_${e2}`]
+              ] }, e2))
+            ]
+          }
+        ),
+        /* @__PURE__ */ u3(
+          Selectric,
+          {
+            id: "filter_affection",
+            label: design.affection_cap,
+            selected: settings.affection,
+            children: [
+              /* @__PURE__ */ u3(k, { children: design.selectors_All }, "all"),
+              /* @__PURE__ */ u3(k, { children: design.capped }, "capped"),
+              /* @__PURE__ */ u3(k, { children: design.uncapped }, "uncapped")
+            ]
+          }
+        ),
+        /* @__PURE__ */ u3(
+          Selectric,
+          {
+            id: "filter_level",
+            label: design.level_cap,
+            selected: settings.level,
+            children: [
+              /* @__PURE__ */ u3(k, { children: design.selectors_All }, "all"),
+              /* @__PURE__ */ u3(k, { children: design.capped }, "capped"),
+              /* @__PURE__ */ u3(k, { children: design.uncapped }, "uncapped")
+            ]
+          }
+        )
+      ] }),
+      /* @__PURE__ */ u3("div", { className: "checkbox-group shortcut-bar", children: [
+        /* @__PURE__ */ u3(
+          "button",
+          {
+            className: "check-btn element-state",
+            value: "all",
+            ...{ tooltip: "All Roles" }
+          }
+        ),
+        RoleIds.map((roleId, i3) => /* @__PURE__ */ u3(
+          "button",
+          {
+            className: "check-btn element-state",
+            value: roleId,
+            ...{ "role-tooltip": roleId },
+            children: /* @__PURE__ */ u3("span", { className: `role-icn girl_role_${roleId}_icn` })
+          },
+          i3
+        ))
+      ] })
+    ] });
+    const $filterBox = $(V2(filterBox));
+    const onChange = () => {
+      const getValue = (e2) => String($filterBox.find(`#filter_${e2}`).val());
+      const grade = getValue("grade");
+      const sort = getValue("sort");
+      const classId = getValue("class");
+      const rarity = getValue("rarity");
+      const element = getValue("element");
+      const role = getValue("role");
+      const affection = getValue("affection");
+      const level = getValue("level");
+      void filterDataPort.write({
+        grade,
+        sort,
+        class: classId,
+        rarity,
+        element,
+        role,
+        affection,
+        level
+      });
+      const isAffectionCapped = (girl) => {
+        return girl.graded >= girl.nb_grades || girl.affection >= aff_table_default[girl.rarity][girl.graded + 1];
+      };
+      const isLevelCapped = (girl) => {
+        return girl.level >= girl.awakening_level * 50 + 250;
+      };
+      const container = document.querySelector(".harem-panel-girls");
+      const oldDisplay = container.style.display;
+      try {
+        container.style.display = "none";
+        document.querySelectorAll(".harem-panel-girls > div[id_girl]").forEach((e2) => {
+          const id_girl = Number(e2.getAttribute("id_girl"));
+          const girl = girlDataMap.get(id_girl);
+          if (girl == null) return;
+          let matched = true;
+          matched &&= element === "all" || girl.element === element;
+          matched &&= classId === "all" || String(girl.class) === classId;
+          matched &&= rarity === "all" || girl.rarity === rarity;
+          matched &&= grade === "all" || (grade === "11" ? girl.nb_grades >= 5 : String(girl.nb_grades) === grade);
+          matched &&= role === "all" || String(girl.id_role) === role;
+          matched &&= affection === "all" || affection === "capped" === isAffectionCapped(girl);
+          matched &&= level === "all" || level === "capped" === isLevelCapped(girl);
+          if (matched && girlIconMap.has(id_girl)) {
+            const { img, url } = girlIconMap.get(id_girl);
+            img.setAttribute("girl-ico-src", url);
+            img.setAttribute("src", url.toImageUrl("ico"));
+            girlIconMap.delete(id_girl);
+          }
+          e2.style.display = matched ? "" : "none";
+        });
+        girlSorter.sort((x3, y3) => y3[sort] - x3[sort]);
+        container.prepend(
+          ...girlSorter.map((e2) => e2.dom).filter((e2) => e2.style.display !== "none")
+        );
+      } catch (_e) {
+      }
+      container.style.display = oldDisplay;
+    };
+    const setting = {
+      disableOnMobile: false,
+      nativeOnMobile: false,
+      maxHeight: 400
+    };
+    [
+      "#filter_grade",
+      "#filter_sort",
+      "#filter_element",
+      "#filter_role",
+      "#filter_class",
+      "#filter_rarity",
+      "#filter_affection",
+      "#filter_level"
+    ].forEach((e2) => {
+      $filterBox.find(e2).selectric(setting).on("change", onChange);
+    });
+    $filterBox.find("#filter_sort").trigger("change");
+    $filterBox.find(".shortcut-bar button.check-btn").each((_3, _e) => {
+      const e2 = _e;
+      const value = e2.value;
+      $(e2).on("click", () => {
+        $("select#filter_role").prop("value", value).selectric("refresh").trigger("change");
+      });
+    });
+    $(".panel-filters").after($filterBox);
+  }
+  function Selectric({
+    id,
+    label,
+    selected,
+    children
+  }) {
+    return /* @__PURE__ */ u3("div", { className: "form-control", children: /* @__PURE__ */ u3("div", { className: "select-group", children: [
+      /* @__PURE__ */ u3("label", { className: "head-group", htmlFor: id, children: label }),
+      /* @__PURE__ */ u3("select", { id, name: id, ...{ icon: "down-arrow" }, children: children.flatMap((e2) => e2).map((vNode) => /* @__PURE__ */ u3(
+        "option",
+        {
+          value: vNode.key,
+          selected: vNode.key === selected,
+          children: vNode
+        },
+        vNode.key
+      )) })
+    ] }) });
+  }
 
   // src/common/data.ts
   function getTeamsFromFighters(fighter) {
@@ -1680,7 +2212,7 @@
     });
     return;
     function registerModules() {
-      const { hhPlusPlusConfig } = window;
+      const { hhPlusPlusConfig } = unsafeWindow;
       if (!hhPlusPlusConfig) return false;
       const GROUP_KEY = "pdsim";
       hhPlusPlusConfig.registerGroup({ key: GROUP_KEY, name: `PD Sim` });

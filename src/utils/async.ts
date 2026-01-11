@@ -2,7 +2,7 @@ import {} from '../common/global';
 
 const DomContentLoaded = new Promise<void>((resolve) => {
   if (document.readyState === 'loading') {
-    window.addEventListener('DOMContentLoaded', () => resolve(), {
+    unsafeWindow.addEventListener('DOMContentLoaded', () => resolve(), {
       capture: true,
       once: true,
     });
@@ -12,11 +12,11 @@ const DomContentLoaded = new Promise<void>((resolve) => {
 });
 
 const JQueryLoaded = new Promise<void>((resolve) => {
-  if (window.$ != null) {
+  if (unsafeWindow.$ != null) {
     resolve();
   } else {
     void DomContentLoaded.then(() => {
-      if (window.$ != null) {
+      if (unsafeWindow.$ != null) {
         resolve();
       }
     });
@@ -72,13 +72,13 @@ export function run<T>(f: () => T): Promise<T> {
 export async function importHHPlusPlusConfig(): Promise<
   HHPlusPlusConfig | undefined
 > {
-  if (window.hhPlusPlusConfig) return window.hhPlusPlusConfig;
+  if (unsafeWindow.hhPlusPlusConfig) return unsafeWindow.hhPlusPlusConfig;
   await afterDomContentLoaded();
-  if (window.hhPlusPlusConfig) return window.hhPlusPlusConfig;
+  if (unsafeWindow.hhPlusPlusConfig) return unsafeWindow.hhPlusPlusConfig;
   await afterGameScriptsRun();
-  if (window.hhPlusPlusConfig) return window.hhPlusPlusConfig;
+  if (unsafeWindow.hhPlusPlusConfig) return unsafeWindow.hhPlusPlusConfig;
   await afterThirdpartyScriptsRun();
-  return window.hhPlusPlusConfig;
+  return unsafeWindow.hhPlusPlusConfig;
 }
 
 export function querySelector(target: HTMLElement, selector: string) {

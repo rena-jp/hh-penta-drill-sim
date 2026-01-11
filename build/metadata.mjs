@@ -15,7 +15,8 @@ function createMetadata(additional) {
 // @match        https://*.transpornstarharem.com/*
 // @match        https://*.gaypornstarharem.com/*
 // @match        https://*.mangarpg.com/*
-// @grant        none
+// @grant        GM.getValue
+// @grant        GM.setValue
 // @run-at       document-body
 ${additional.trim()}
 // ==/UserScript==

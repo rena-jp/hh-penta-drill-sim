@@ -1,10 +1,37 @@
-body.page-edit-penta-drill-team .harem-panel .harem-panel-girls {
-  padding: 0;
-  grid-row-gap: 0;
-  grid-template-columns: repeat(5, 58px);
-}
+body[page="edit-penta-drill-team"].page-edit-penta-drill-team
+  > #contains_all
+  > section
+  > #edit-team-page.penta-drill
+  > .change-team-panel.harem-panel {
+  .panel-title {
+    height: 2.5rem;
+    margin-bottom: 0.5rem;
+  }
 
-body.page-edit-penta-drill-team .harem-panel-girls .harem-girl-container {
-  width: 58px;
-  height: 80px;
+  & > .panel-body {
+    height: calc(100% - 3rem);
+    border-radius: 5px;
+
+    & > .harem-panel-girls {
+      padding: 0;
+      grid-row-gap: 2px;
+      grid-template-columns: repeat(5, 58px);
+
+      & > .harem-girl-container {
+        width: 56px;
+        height: 64px;
+        padding: 0 2px;
+        justify-content: start;
+
+        .girl-power-icon {
+          font-size: 9px;
+          margin-top: 0;
+          width: 16px;
+          height: 12px;
+          background-size: 16px;
+          line-height: 12px;
+        }
+      }
+    }
+  }
 }

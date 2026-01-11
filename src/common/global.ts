@@ -1,4 +1,4 @@
-import type { Fighter, Player } from './types';
+import type { Element, Fighter, Player, Rarity, RoleId } from './types';
 
 declare global {
   interface Window {
@@ -7,10 +7,43 @@ declare global {
     GT: {
       design: Record<string, string>;
     };
+    HH_UNIVERSE: string;
+    shared: {
+      Hero: {
+        infos: {
+          id: number;
+        };
+      };
+    };
+  }
+
+  interface String {
+    toImageUrl(resizingType: 'ava' | 'avb' | 'ico'): string;
   }
 
   interface JQuery {
-    selectric(arg: string): JQuery;
+    selectric(
+      arg?:
+        | string
+        | {
+            maxHeight?: number;
+            disableOnMobile: boolean;
+            nativeOnMobile: boolean;
+            onChange?: (element: HTMLSelectElement) => void;
+            optionsItemBuilder?:
+              | string
+              | ((itemData: {
+                  className: string;
+                  disabled: boolean;
+                  selected: boolean;
+                  element: JQuery<HTMLOptionElement>;
+                  index: number;
+                  slug: string;
+                  text: string;
+                  value: string;
+                }) => string);
+          },
+    ): JQuery;
   }
 
   interface HHPlusPlusConfig {
@@ -67,10 +100,36 @@ declare global {
     hero_fighter?: Fighter;
     opponent_fighter?: Fighter;
     availableGirls?: AvailableGirl[];
+    all_teams?: {
+      girls: AvailableGirl[];
+    }[];
   }
 
   interface AvailableGirl {
+    affection: number;
+    awakening_level: number;
+    battle_caracs: {
+      chance: number;
+      damage: number;
+      defense: number;
+      ego: number;
+      mana_generation: number;
+      mana_starting: number;
+      speed: number;
+    };
+    class: number;
+    element: Element;
+    figure: number;
+    graded: number;
+    graded2: string;
     id_girl: number;
+    id_role: RoleId;
+    level: number;
+    nb_grades: number;
+    power_display: number;
+    rarity: Rarity;
+    role_data: { id: number };
+    xp: number;
   }
 }
 

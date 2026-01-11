@@ -31,7 +31,7 @@ void (async function () {
 
   function registerModules() {
     // Import modules from HHPlusPlus
-    const { hhPlusPlusConfig } = window;
+    const { hhPlusPlusConfig } = unsafeWindow;
     if (!hhPlusPlusConfig) return false;
 
     // Register My Modules

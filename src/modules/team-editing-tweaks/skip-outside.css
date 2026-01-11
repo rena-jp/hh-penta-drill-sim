@@ -1,0 +1,10 @@
+body[page="edit-penta-drill-team"].page-edit-penta-drill-team
+  > #contains_all
+  > section
+  > #edit-team-page.penta-drill
+  > .change-team-panel.harem-panel
+  > .panel-body
+  > .harem-panel-girls
+  > .harem-girl-container {
+  content-visibility: auto;
+}

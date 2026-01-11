@@ -13,7 +13,7 @@ export function selectTargetsFrom(targets: SimGirl[], maxCount: number) {
   if (targets.length <= maxCount) return targets;
   const temp = [...targets];
   const ret = [] as SimGirl[];
-  [...(Array(maxCount) as [])].forEach(() => {
+  [...Array<never>(maxCount)].forEach(() => {
     const i = Math.floor(Math.random() * temp.length);
     ret.push(temp[i]!);
     temp[i] = temp[temp.length - 1]!;

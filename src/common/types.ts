@@ -58,7 +58,7 @@ export const ElementNameMap = {
   sun: 'Playful',
 } as const;
 
-export const RoleIds = [1, 2, 3, 4, 5, 6, 9, 10] as const;
+export const RoleIds = [4, 10, 9, 3, 1, 2, 5, 6] as const;
 
 export type RoleId = (typeof RoleIds)[number];
 
