@@ -375,7 +375,7 @@ async function overrideFilter({ lazyLoad }: { lazyLoad: boolean }) {
   const settings = await filterDataPort.read();
 
   const filterBox = (
-    <div id="arena_filter_box" className="panel-filters">
+    <div id="pdsim-filter-box" className="panel-filters">
       <div className="form-wrapper">
         <Selectric
           id="filter_grade"
