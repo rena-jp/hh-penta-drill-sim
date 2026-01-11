@@ -7,7 +7,12 @@ export const CompactRewardsModule: MyModule<never> = {
   label: 'Compact battle rewards',
   default: false,
   run() {
-    if (!Page.startsWith('/penta-drill-battle.html')) return;
-    Style.injectToHead(css);
+    if (
+      Page.startsWith('/penta-drill-battle') ||
+      Page.startsWith('/penta-drill-arena') ||
+      Page.startsWith('/penta-drill-pre-battle')
+    ) {
+      Style.injectToHead(css);
+    }
   },
 };
