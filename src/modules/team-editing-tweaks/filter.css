@@ -1,161 +1,176 @@
-body.page-edit-penta-drill-team .harem-panel-girls .harem-girl-container {
-  transition: none;
-}
+body[page="edit-penta-drill-team"].page-edit-penta-drill-team
+  > #contains_all
+  > section
+  > #edit-team-page.container.penta-drill {
+  & > .change-team-panel.harem-panel {
+    .harem-panel-girls .harem-girl-container {
+      transition: none;
+    }
 
-.panel-filters {
-  display: none;
-}
+    & > #arena_filter {
+      display: none;
+    }
 
-#arena_filter_box.panel-filters {
-  display: none;
-  white-space: nowrap;
-  position: absolute;
-  width: auto;
-  height: auto;
-
-  &.panel-filters {
-    &.visible-filters-panel {
-      display: block;
+    & > #filter_girls {
+      display: inline-block;
     }
   }
 
-  .form-wrapper {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    grid-gap: 0 0.5rem;
-    width: 24rem;
-    margin-right: 0.5rem;
-    & > .form-control > .select-group {
-      .selectric-open {
-        z-index: unset;
+  & > .panel-filters {
+    display: none;
+  }
+
+  & > #pdsim-filter-box.panel-filters {
+    display: none;
+    white-space: nowrap;
+    position: absolute;
+    width: auto;
+    height: auto;
+
+    &.panel-filters {
+      &.visible-filters-panel {
+        display: block;
       }
+    }
 
-      .selectric-items {
-        z-index: 20;
-        height: auto;
+    .form-wrapper {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      grid-gap: 0 0.5rem;
+      width: 24rem;
+      margin-right: 0.5rem;
+      & > .form-control > .select-group {
+        .selectric-open {
+          z-index: unset;
+        }
 
-        li {
+        .selectric-items {
+          z-index: 20;
           height: auto;
-          line-height: 1.5rem;
-          padding: 0.25rem 0.5rem;
-          display: flex;
-          align-items: center;
 
-          & > span.clip {
-            width: unset;
-            height: unset;
-            float: unset;
+          li {
+            height: auto;
+            line-height: 1.5rem;
+            padding: 0.25rem 0.5rem;
+            display: flex;
+            align-items: center;
+
+            & > span.clip {
+              width: unset;
+              height: unset;
+              float: unset;
+            }
           }
         }
       }
     }
-  }
 
-  .selectric-wrapper > .selectric > span.label {
-    display: flex;
-    align-items: center;
+    .selectric-wrapper > .selectric > span.label {
+      display: flex;
+      align-items: center;
 
-    & > span.clip {
-      overflow: hidden;
-      text-overflow: ellipsis;
-      width: 8.5rem;
+      & > span.clip {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        width: 8.5rem;
+      }
     }
-  }
 
-  span[carac] {
-    width: 1.5rem;
-    height: 1.5rem;
-    line-height: 1.5rem;
-    &::before {
+    span[carac] {
       width: 1.5rem;
       height: 1.5rem;
-      margin-right: 0.25rem;
+      line-height: 1.5rem;
+      &::before {
+        width: 1.5rem;
+        height: 1.5rem;
+        margin-right: 0.25rem;
+      }
     }
-  }
 
-  .girl-power-icon,
-  .pdsim-selectric-icon {
-    height: 1.5rem;
-    width: 1.5rem;
-    background-size: contain;
-    background-position: center;
-    margin-right: 0.25rem;
+    .girl-power-icon,
+    .pdsim-selectric-icon {
+      height: 1.5rem;
+      width: 1.5rem;
+      background-size: contain;
+      background-position: center;
+      margin-right: 0.25rem;
 
-    &.rarity-background {
-      border: 2px solid #fff;
-      border-radius: 4px;
-      /*
+      &.rarity-background {
+        border: 2px solid #fff;
+        border-radius: 4px;
+        /*
       background-color: #ccd7dd;
       background-image: linear-gradient(to bottom, #034, #ccd7dd);
       */
 
-      &:after {
-        line-height: 20px;
-        font-size: 14px;
-        position: absolute;
-        width: 20px;
-        height: 20px;
-        text-align: center;
-        color: white;
-        text-shadow:
-          1px -1px black,
-          1px 1px black,
-          -1px -1px black,
-          -1px 1px black,
-          0px -1px black,
-          0px 1px black,
-          -1px 0px black,
-          1px 0px black;
-      }
+        &:after {
+          line-height: 20px;
+          font-size: 14px;
+          position: absolute;
+          width: 20px;
+          height: 20px;
+          text-align: center;
+          color: white;
+          text-shadow:
+            1px -1px black,
+            1px 1px black,
+            -1px -1px black,
+            -1px 1px black,
+            0px -1px black,
+            0px 1px black,
+            -1px 0px black,
+            1px 0px black;
+        }
 
-      &.starting:after {
-        content: "S";
-      }
-      &.common:after {
-        content: "C";
-      }
-      &.rare:after {
-        content: "R";
-      }
-      &.epic:after {
-        content: "E";
-      }
-      &.legendary:after {
-        content: "L";
-      }
-      &.mythic:after {
-        content: "M";
+        &.starting:after {
+          content: "S";
+        }
+        &.common:after {
+          content: "C";
+        }
+        &.rare:after {
+          content: "R";
+        }
+        &.epic:after {
+          content: "E";
+        }
+        &.legendary:after {
+          content: "L";
+        }
+        &.mythic:after {
+          content: "M";
+        }
       }
     }
-  }
 
-  .shortcut-bar {
-    width: auto;
-    margin: 0;
-    padding: 0.5rem 0.5rem 0 0;
+    .shortcut-bar {
+      width: auto;
+      margin: 0;
+      padding: 0.5rem 0.5rem 0 0;
 
-    .check-btn.element-state {
-      width: 38px;
-      height: 38px;
-      padding: 0;
+      .check-btn.element-state {
+        width: 38px;
+        height: 38px;
+        padding: 0;
 
-      .role-icn {
-        width: 36px;
-        height: 36px;
-        background-size: 27px;
+        .role-icn {
+          width: 36px;
+          height: 36px;
+          background-size: 27px;
+        }
       }
     }
   }
 }
 
 @media (min-width: 1026px) {
-  #arena_filter_box {
+  #pdsim-filter-box {
     top: 8rem;
   }
 }
 
 @media (max-width: 1025px) {
-  #arena_filter_box {
+  #pdsim-filter-box {
     top: 9rem;
   }
 }
