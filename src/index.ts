@@ -6,7 +6,7 @@ import { Async } from './utils';
 void (async function () {
   'use strict';
 
-  await Async.afterJQueryLoaded();
+  await Async.afterHeadLoaded();
 
   const moduleList = Object.values(Modules) as MyModule<string>[];
 

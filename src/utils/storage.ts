@@ -1,4 +1,5 @@
 function getStorageKey(key: string) {
+  // after DOMContentLoaded
   const universe = unsafeWindow.HH_UNIVERSE;
   const id = unsafeWindow.shared.Hero.infos.id;
   return `${universe}-${id}-${key}`;
@@ -17,10 +18,10 @@ export class LiteralDataPort<T> {
     private key: string,
     private defaultValue: T,
   ) {}
-  read(): Promise<T> {
+  public read(): Promise<T> {
     return getData(this.key, this.defaultValue);
   }
-  write(value: T): Promise<void> {
+  public write(value: T): Promise<void> {
     return setData(this.key, value);
   }
 }
@@ -37,3 +38,10 @@ export class ObjectDataPort<T> {
     return setData(this.key, value);
   }
 }
+
+export type DataPortValueType<T> =
+  T extends LiteralDataPort<infer U>
+    ? U
+    : T extends ObjectDataPort<infer U>
+      ? U
+      : never;

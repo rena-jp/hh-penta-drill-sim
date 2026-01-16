@@ -7,10 +7,12 @@ body[page="edit-penta-drill-team"].page-edit-penta-drill-team
       transition: none;
     }
 
+    /* Avoid conflict with HH++ */
     & > #arena_filter {
       display: none;
     }
 
+    /* Avoid conflict with HH++ */
     & > #filter_girls {
       display: inline-block;
     }
@@ -26,6 +28,7 @@ body[page="edit-penta-drill-team"].page-edit-penta-drill-team
     position: absolute;
     width: auto;
     height: auto;
+    transition: none;
 
     &.panel-filters {
       &.visible-filters-panel {

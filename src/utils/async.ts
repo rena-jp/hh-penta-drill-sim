@@ -1,6 +1,43 @@
 import {} from '../common/global';
 
-const DomContentLoaded = new Promise<void>((resolve) => {
+const bodyPromise: Promise<HTMLElement> = new Promise((resolve) => {
+  const document = unsafeWindow.document;
+  if (document.body != null) {
+    resolve(document.body);
+  } else {
+    const htmlObserver = new MutationObserver(() => {
+      if (document.body != null) {
+        htmlObserver.disconnect();
+        resolve(document.body);
+      }
+    });
+    const html = document.documentElement;
+    htmlObserver.observe(html, { childList: true });
+  }
+});
+
+const pagePromise: Promise<string> = bodyPromise.then((body) => {
+  const page = body.getAttribute('page');
+  if (page != null) {
+    return page;
+  } else {
+    return new Promise((resolve) => {
+      const bodyObserver = new MutationObserver(() => {
+        const page = body.getAttribute('page');
+        if (page != null) {
+          bodyObserver.disconnect();
+          resolve(page);
+        }
+      });
+      bodyObserver.observe(body, {
+        attributes: true,
+        attributeFilter: ['page'],
+      });
+    });
+  }
+});
+
+const domContentLoadedCapturePromise = new Promise<void>((resolve) => {
   if (document.readyState === 'loading') {
     unsafeWindow.addEventListener('DOMContentLoaded', () => resolve(), {
       capture: true,
@@ -11,57 +48,50 @@ const DomContentLoaded = new Promise<void>((resolve) => {
   }
 });
 
-const JQueryLoaded = new Promise<void>((resolve) => {
-  if (unsafeWindow.$ != null) {
-    resolve();
-  } else {
-    void DomContentLoaded.then(() => {
-      if (unsafeWindow.$ != null) {
-        resolve();
-      }
+const domContentLoadedBubblePromise = new Promise<void>((resolve) => {
+  if (document.readyState === 'loading') {
+    unsafeWindow.addEventListener('DOMContentLoaded', () => resolve(), {
+      capture: false,
+      once: true,
     });
+  } else {
+    resolve();
   }
 });
 
-const GameScriptsRun = new Promise<void>((resolve) => {
-  void DomContentLoaded.then(() => {
-    $(() => {
-      resolve();
-    });
+const gameScriptsRunPromise = domContentLoadedCapturePromise.then(() => {
+  return new Promise<void>((resolve) => {
+    $(() => resolve());
   });
 });
 
-const ThirdpartyScriptsRun = new Promise<void>((resolve) => {
-  void GameScriptsRun.then(() => {
-    $(() => {
-      resolve();
-    });
+const thirdpartyScriptsRunPromise = new Promise<void>((resolve) => {
+  void gameScriptsRunPromise.then(() => {
+    $(() => resolve());
   });
 });
 
-/*
-export async function beforeGameScriptsRun(): Promise<void> {
-  await Promise.all([JQueryLoaded, DomContentLoaded]);
+export async function afterHeadLoaded(): Promise<void> {
+  await pagePromise;
 }
-*/
 
-export function afterJQueryLoaded(): Promise<void> {
-  return JQueryLoaded;
+export function afterBodyLoaded(): Promise<void> {
+  return domContentLoadedCapturePromise;
 }
 
 export function afterDomContentLoaded(): Promise<void> {
-  return DomContentLoaded;
+  return domContentLoadedBubblePromise;
 }
 
 export function afterGameScriptsRun(): Promise<void> {
-  return GameScriptsRun;
+  return gameScriptsRunPromise;
 }
 
 export function afterThirdpartyScriptsRun(): Promise<void> {
-  return ThirdpartyScriptsRun;
+  return thirdpartyScriptsRunPromise;
 }
 
-export function run<T>(f: () => T): Promise<T> {
+export function run<T>(f: () => Promise<T> | T): Promise<T> {
   return new Promise((resolve) => {
     queueMicrotask(() => {
       void Promise.resolve(f()).then(resolve);
@@ -73,8 +103,12 @@ export async function importHHPlusPlusConfig(): Promise<
   HHPlusPlusConfig | undefined
 > {
   if (unsafeWindow.hhPlusPlusConfig) return unsafeWindow.hhPlusPlusConfig;
-  await afterDomContentLoaded();
+  await afterHeadLoaded();
   if (unsafeWindow.hhPlusPlusConfig) return unsafeWindow.hhPlusPlusConfig;
+  await afterBodyLoaded();
+  if (unsafeWindow.hhPlusPlusConfig) return unsafeWindow.hhPlusPlusConfig; // ViolentMonkey
+  await afterDomContentLoaded();
+  if (unsafeWindow.hhPlusPlusConfig) return unsafeWindow.hhPlusPlusConfig; // TamperMonkey
   await afterGameScriptsRun();
   if (unsafeWindow.hhPlusPlusConfig) return unsafeWindow.hhPlusPlusConfig;
   await afterThirdpartyScriptsRun();

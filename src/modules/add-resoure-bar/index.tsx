@@ -10,7 +10,7 @@ export const AddResoureBarModule: MyModule<never> = {
   async run(): Promise<void> {
     if (!Page.startsWith('/penta-drill-pre-battle')) return;
     Style.injectToHead(css);
-    await Async.afterDomContentLoaded();
+    await Async.afterBodyLoaded();
     $('.penta-drill-pre-battle-container').append(
       render(
         <div className="pdsim-resource-box">

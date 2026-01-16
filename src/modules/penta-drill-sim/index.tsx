@@ -23,7 +23,7 @@ export const PentaDrillSimModule: MyModule<
   async run(settings) {
     if (settings.arena && Page.startsWith('/penta-drill-arena.html')) {
       Style.injectToHead(css);
-      await Async.afterDomContentLoaded();
+      await Async.afterBodyLoaded();
 
       const { player_datas, opponents_list } = unsafeWindow;
       if (player_datas == null || opponents_list == null) {
@@ -91,9 +91,8 @@ export const PentaDrillSimModule: MyModule<
     }
 
     if (Page.startsWith('/penta-drill-pre-battle')) {
-      await Async.afterDomContentLoaded();
-
       Style.injectToHead(css);
+      await Async.afterBodyLoaded();
 
       if (settings.preBattle) {
         const { hero_fighter, opponent_fighter } = unsafeWindow;

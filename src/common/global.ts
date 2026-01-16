@@ -2,11 +2,22 @@ import type { Element, Fighter, Player, Rarity, RoleId } from './types';
 
 declare global {
   interface Window {
+    // head (document-body)
     $: JQueryStatic;
+    SITE_ROOT: string;
+    IMAGES_URL: string;
+    hh_nutaku: null | {
+      sess: string;
+    };
+
+    // document-body - document-end
     hhPlusPlusConfig?: HHPlusPlusConfig;
+
+    // body (document-end)
     GT: {
       design: Record<string, string>;
     };
+    GIRL_MAX_LEVEL: number;
     HH_UNIVERSE: string;
     shared: {
       Hero: {
@@ -15,6 +26,8 @@ declare global {
         };
       };
     };
+    // server_now_ts?: number;
+    // current_page: string;
   }
 
   interface String {
@@ -122,6 +135,7 @@ declare global {
     figure: number;
     graded: number;
     graded2: string;
+    ico: string;
     id_girl: number;
     id_role: RoleId;
     level: number;

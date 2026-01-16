@@ -37,6 +37,26 @@ body[page="edit-penta-drill-team"].page-edit-penta-drill-team
         }
       }
     }
+
+    &.bar-section {
+      padding: 0;
+      width: max-content;
+      height: min-content;
+
+      & > .top-text {
+        & > .girl_quests {
+          position: static;
+          z-index: 0;
+          line-height: 0;
+
+          & > g {
+            width: 8px;
+            height: 10px;
+            background-size: 10px;
+          }
+        }
+      }
+    }
   }
 
   .pdsim-class {
@@ -58,6 +78,7 @@ body[page="edit-penta-drill-team"].page-edit-penta-drill-team
     background-color: #fff;
   }
 
+  /* Hexagon */
   & > .change-team-panel.player-panel {
     .icon.hexagon-girl-element {
       display: none;
@@ -68,8 +89,13 @@ body[page="edit-penta-drill-team"].page-edit-penta-drill-team
       border-radius: 5px;
     }
 
-    .pdsim-grade.new_girl_tooltip {
-      bottom: 6px;
+    .pdsim-grade {
+      &.new_girl_tooltip {
+        bottom: 6px;
+      }
+      &.bar-section {
+        bottom: 4px;
+      }
     }
 
     .pdsim-class {
@@ -96,16 +122,56 @@ body[page="edit-penta-drill-team"].page-edit-penta-drill-team
     }
   }
 
-  & > .change-team-panel.harem-panel .panel-body {
+  /* Grid */
+  & > .change-team-panel.harem-panel > .panel-body {
     border-radius: 5px;
 
-    .harem-panel-girls {
+    & > .harem-panel-girls {
       grid-row-gap: 0;
 
-      .harem-girl-container {
+      & > .harem-girl-container {
         border-radius: 5px;
         justify-content: start;
         padding: 0 2px;
+
+        &[team_slot]:not(.part-of-another-team) {
+          &::after {
+            position: absolute;
+            top: 0;
+            left: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 1.5rem;
+            height: 1.5rem;
+            font-size: 1rem;
+            text-shadow:
+              1px 1px 0 #000000,
+              -1px 1px 0 #000000,
+              -1px -1px 0 #000000,
+              1px -1px 0 #000000;
+            border-radius: 5px;
+            border: 0.125rem solid #feb825;
+            background: linear-gradient(to bottom, #ffa23e 0%, #ff545c 100%);
+            z-index: 3;
+          }
+
+          &[team_slot="1"]::after {
+            content: "1";
+          }
+          &[team_slot="2"]::after {
+            content: "2";
+          }
+          &[team_slot="3"]::after {
+            content: "3";
+          }
+          &[team_slot="4"]::after {
+            content: "4";
+          }
+          &[team_slot="5"]::after {
+            content: "5";
+          }
+        }
 
         &:not(.selected)[team_slot] .grey-overlay {
           border-radius: 3px;
@@ -116,43 +182,66 @@ body[page="edit-penta-drill-team"].page-edit-penta-drill-team
           border-radius: 5px;
         }
 
-        .girl-element,
-        .girl-power-icon {
+        & > .girl-element,
+        & > .girl-power-icon {
           display: none;
         }
-      }
 
-      .pdsim-level {
-        top: 0;
-        right: 2px;
-        border-radius: 0 5px 0 5px;
-      }
+        .pdsim-level {
+          top: 0;
+          right: 2px;
+          border-radius: 0 5px 0 5px;
+        }
 
-      .pdsim-grade.new_girl_tooltip {
-        bottom: 0;
-      }
-
-      .pdsim-class {
-        left: 2px;
-        bottom: 12px;
-
-        &::before {
-          left: 0;
+        .pdsim-grade.new_girl_tooltip,
+        .pdsim-grade.bar-section {
           bottom: 0;
+        }
+
+        .pdsim-class {
+          left: 2px;
+          bottom: 12px;
+
+          &::before {
+            left: 0;
+            bottom: 0;
+            width: 16px;
+            height: 16px;
+            background-size: 14px;
+            border-radius: 0 5px 0 5px;
+          }
+        }
+
+        .pdsim-role {
+          right: 2px;
+          bottom: 12px;
           width: 16px;
           height: 16px;
           background-size: 14px;
-          border-radius: 0 5px 0 5px;
+          border-radius: 5px 0 5px 0;
         }
-      }
 
-      .pdsim-role {
-        right: 2px;
-        bottom: 12px;
-        width: 16px;
-        height: 16px;
-        background-size: 14px;
-        border-radius: 5px 0 5px 0;
+        .pdsim-filter-value {
+          pointer-events: none;
+          position: absolute;
+          bottom: 0;
+          font-size: 9px;
+          line-height: 10px;
+          white-space: nowrap;
+
+          .girl-power-icon {
+            display: inline-block;
+            margin: 0;
+            width: 8px;
+            height: 10px;
+            background-size: 10px;
+          }
+
+          [carac]::before {
+            width: 10px;
+            height: 10px;
+          }
+        }
       }
     }
   }

@@ -25,6 +25,6 @@
     "skipLibCheck": true,
     "moduleResolution": "bundler"
   },
-  "include": ["build", "src/**/*.ts"],
+  "include": ["build", "src/**/*.ts", "src/**/*.tsx"],
   "exclude": ["dist", "node_modules"],
 }

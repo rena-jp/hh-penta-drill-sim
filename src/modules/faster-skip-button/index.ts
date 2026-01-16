@@ -18,7 +18,7 @@ export const FasterSkipButtonModule: MyModule<'clickableSkipButton'> = {
     if (settings.clickableSkipButton) {
       Style.injectToHead(ClickableSkipButtonsCss);
     }
-    await Async.afterDomContentLoaded();
+    await Async.afterBodyLoaded();
 
     $(document).ajaxComplete((_event, _jqXHR, ajaxOptions) => {
       const { url, data } = ajaxOptions;
