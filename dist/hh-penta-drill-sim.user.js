@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Hentai Heroes Penta Drill Sim
 // @namespace    https://github.com/rena-jp/hh-penta-drill-sim
-// @version      0.0.21
+// @version      0.0.22
 // @description  Add Penta Drill simulator for Hentai Heroes
 // @author       rena
 // @match        https://*.hentaiheroes.com/*
@@ -1609,9 +1609,7 @@
     container.insertAdjacentHTML("beforeend", getRoleHtml(girl));
   }
   function getIdFromImg(img) {
-    return Number(
-      img.getAttribute("src")?.match(/\/(\d+)\/(?:ico|grade_skins)/)?.[1]
-    );
+    return Number(img.closest("[data-girl-id]")?.dataset.girlId);
   }
   function getLevelHtml(girl) {
     const { level, awakening_level } = girl.availableGirl;

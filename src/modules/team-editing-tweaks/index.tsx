@@ -360,9 +360,7 @@ function addInfo(
 }
 
 function getIdFromImg(img: HTMLImageElement) {
-  return Number(
-    img.getAttribute('src')?.match(/\/(\d+)\/(?:ico|grade_skins)/)?.[1],
-  );
+  return Number(img.closest<HTMLElement>('[data-girl-id]')?.dataset.girlId);
 }
 
 function getLevelHtml(girl: FilterGirl): string {
