@@ -1,4 +1,11 @@
-import type { Element, Fighter, Player, Rarity, RoleId } from './types';
+import type {
+  Element,
+  Fighter,
+  FighterLog,
+  Player,
+  Rarity,
+  RoleId,
+} from './types';
 
 declare global {
   interface Window {
@@ -105,6 +112,14 @@ declare global {
   interface Window {
     hero_fighter?: Fighter;
     opponent_fighter?: Fighter;
+  }
+
+  // /penta-drill-battle
+  interface Window {
+    // hero_fighter?: Team[];
+    hero_fighter_v4?: FighterLog;
+    // opponent_fighter?: Team[];
+    opponent_fighter_v4?: FighterLog;
   }
 
   // /edit-penta-drill-team

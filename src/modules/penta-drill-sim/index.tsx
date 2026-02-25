@@ -3,13 +3,18 @@ import {
   getTeamsFromFighters,
   getTeamsFromGamePlayer,
 } from '../../common/data';
-import type { MyModule, Player } from '../../common/types';
+import type {
+  MyModule,
+  PentaDrillBattleResponseData,
+  Player,
+} from '../../common/types';
 import { simulatePentaDrill } from '../../simulator/simulator';
+import { validatePentaDrill } from '../../simulator/validator';
 import { Async, Color, Page, Style } from '../../utils';
 import css from './style.css';
 
 export const PentaDrillSimModule: MyModule<
-  'arena' | 'preBattle' | 'heavy' | 'developer'
+  'arena' | 'preBattle' | 'heavy' | 'debugLog'
 > = {
   key: 'PentaDrillSimModule',
   label: 'Penta Drill Sim',
@@ -19,6 +24,11 @@ export const PentaDrillSimModule: MyModule<
     { key: 'preBattle', default: true, label: 'Run on pre-battle page' },
     { key: 'heavy', default: false, label: 'Heavy simulation (slow)' },
     // { key: 'developer', default: false, label: 'Developer mode' },
+    {
+      key: 'debugLog',
+      default: false,
+      label: 'Output debug log to console',
+    },
   ],
   async run(settings) {
     if (settings.arena && Page.startsWith('/penta-drill-arena.html')) {
@@ -157,6 +167,27 @@ export const PentaDrillSimModule: MyModule<
         const $box = createSimResultsBox(expected);
         $('.opponent_rewards').after($box);
       }
+    }
+
+    if (settings.debugLog && Page.startsWith('/penta-drill-battle.html')) {
+      $(document).ajaxComplete((_event, jqXHR, ajaxOptions) => {
+        const { url, data } = ajaxOptions;
+        if (!url?.startsWith('/ajax.php')) return;
+        if (typeof data !== 'string') return;
+        if (data.includes('action=do_battles_penta_drill')) {
+          const { hero_fighter_v4, opponent_fighter_v4 } = unsafeWindow;
+          if (hero_fighter_v4 == null || opponent_fighter_v4 == null) return;
+          const responseData =
+            jqXHR.responseJSON as PentaDrillBattleResponseData;
+          const debugLog = {
+            hero_fighter_v4,
+            opponent_fighter_v4,
+            responseData,
+          };
+          console.log(JSON.stringify(debugLog));
+          validatePentaDrill(debugLog);
+        }
+      });
     }
 
     function createSimResultsBox(expected: {

@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Hentai Heroes Penta Drill Sim
 // @namespace    https://github.com/rena-jp/hh-penta-drill-sim
-// @version      0.0.22
+// @version      0.0.23
 // @description  Add Penta Drill simulator for Hentai Heroes
 // @author       rena
 // @match        https://*.hentaiheroes.com/*
@@ -2371,9 +2371,9 @@
       defender = getLowestEgoValue(defenderTeam);
     } else {
       let targets = defenderTeam.front.filter((e2) => !e2.is_defeated);
-      if (targets.length == 0)
+      if (targets.length === 0)
         targets = defenderTeam.middle.filter((e2) => !e2.is_defeated);
-      if (targets.length == 0)
+      if (targets.length === 0)
         targets = defenderTeam.back.filter((e2) => !e2.is_defeated);
       defender = selectTargetFrom(targets);
     }
@@ -2388,6 +2388,316 @@
     receiveDamage(defender, damage);
   }
 
+  // src/simulator/phases/hit.ts
+  function validateHit(params, roundLog) {
+    const { attacker, defenderTeam } = params;
+    if (attacker.stun_summary === 0) {
+      if (attacker.id_role === RoleId.Fluffer) {
+        const { noHeal } = validateFlufferHeal(params, roundLog);
+        if (noHeal) validateAttack(params, roundLog);
+      } else {
+        validateAttack(params, roundLog);
+      }
+      simulateManaGeneration(params);
+      if (isDefeated(defenderTeam)) {
+      }
+    }
+  }
+  function validateFlufferHeal({ attacker, attackerTeam }, roundLog) {
+    if (roundLog.attacker_hit == null) throw new Error("Actual: no hit");
+    const flufferTargets = attackerTeam.list.filter(
+      (e2) => e2 !== attacker && !e2.is_defeated && e2.remaining_ego < e2.initial_ego
+    );
+    if (flufferTargets.length === 0) return { noHeal: true };
+    const target = attackerTeam.map[roundLog.attacker_hit.defender.id_girl];
+    let heal = attacker.damage;
+    const isCritical2 = roundLog.attacker_hit.is_critical;
+    if (isCritical2) {
+      heal += Math.max(0, attacker.damage - target.defense);
+    }
+    if (!attacker.is_hero_fighter) heal = Math.ceil(heal * 0.05);
+    heal = Math.min(heal, target.initial_ego - target.remaining_ego);
+    target.remaining_ego += heal;
+    return { noHeal: false };
+  }
+  function validateAttack({ attacker, defenderTeam }, roundLog) {
+    if (roundLog.attacker_hit == null) throw new Error("Actual: no hit");
+    const defenderId = roundLog.defender_id_girl;
+    const defender = defenderTeam.map[defenderId];
+    let damage = Math.max(0, attacker.damage - defender.defense);
+    const isCritical2 = roundLog.attacker_hit.is_critical;
+    if (isCritical2) {
+      if (attacker.id_role === RoleId.Bugger) {
+        damage = Math.ceil(damage * 2.4);
+      } else {
+        damage *= 2;
+      }
+    }
+    receiveDamage(defender, damage);
+  }
+
+  // src/simulator/team.ts
+  function validateTeam(expected, actual) {
+    const logs = [];
+    const eMap = expected.map;
+    const aMap = actual;
+    Object.keys(aMap).forEach((id) => {
+      const log = validateGirl(eMap[id], aMap[id]);
+      if (log) {
+        console.log(eMap[id], aMap[id]);
+        throw new Error("validateTeam");
+      }
+    });
+    return logs.length > 0;
+  }
+  function validateGirl(expected, actual) {
+    const logs = [];
+    [
+      "id_fighter",
+      "id_girl",
+      "damage",
+      "defense",
+      "chance",
+      "remaining_ego",
+      "remaining_mana",
+      "speed",
+      "is_hero_fighter",
+      "total_shields_amount",
+      "is_defeated"
+    ].forEach((e2) => {
+      const expectedValue = expected[e2];
+      const actualValue = actual[e2];
+      if (expectedValue !== actualValue) {
+        console.log("invalid", {
+          key: e2,
+          expectedValue,
+          actualValue,
+          expected,
+          actual
+        });
+        logs.push({
+          type: "girl params",
+          key: e2,
+          expected: expectedValue,
+          actual: actualValue
+        });
+      }
+    });
+    return logs.length > 0;
+  }
+  function getPatchedTeam(logTeam, patches) {
+    return Object.fromEntries(
+      Object.entries(logTeam).map(([id, girl]) => {
+        return [id, { ...girl, ...patches[id] }];
+      })
+    );
+  }
+  function patchTeam(logTeam, patches) {
+    Object.entries(patches).forEach(([id, patch]) => {
+      Object.assign(logTeam[id], patch);
+    });
+  }
+
+  // src/simulator/phases/skill.ts
+  function validateSkill(params, roundLog) {
+    const { attacker } = params;
+    if (attacker.stun_summary === 0) {
+      try {
+        throw 0;
+      } catch (e2) {
+        {
+          const { initial, after_hit, after_skill } = roundLog.changes.hero;
+          let current = getPatchedTeam(initial, after_hit);
+          current = getPatchedTeam(current, after_skill);
+          patchTeam(params.heroTeam.map, current);
+        }
+        {
+          const { initial, after_hit, after_skill } = roundLog.changes.opponent;
+          let current = getPatchedTeam(initial, after_hit);
+          current = getPatchedTeam(current, after_skill);
+          patchTeam(params.opponentTeam.map, current);
+        }
+      }
+    }
+  }
+
+  // src/simulator/validator.ts
+  function validatePentaDrill({
+    hero_fighter_v4,
+    opponent_fighter_v4,
+    responseData
+  }) {
+    if (!responseData.success) return;
+    const player = getTeamsFromGamePlayer({
+      ...hero_fighter_v4,
+      is_hero: true
+    });
+    const opponent = getTeamsFromGamePlayer({
+      ...opponent_fighter_v4,
+      is_hero: false
+    });
+    validateBattle(player, opponent, responseData.team_rounds);
+  }
+  function validateBattle(heroTeams, opponentTeams, roundsLogs) {
+    const matches = Math.min(
+      heroTeams.length,
+      opponentTeams.length,
+      roundsLogs.length
+    );
+    let currentRounds = 0;
+    for (let i3 = 0; i3 < matches; i3++) {
+      const heroTeam = heroTeams[i3];
+      const opponentTeam = opponentTeams[i3];
+      const roundLogs = roundsLogs[i3].rounds;
+      const result = validateMatch(
+        heroTeam,
+        opponentTeam,
+        currentRounds,
+        i3 + 1,
+        roundLogs
+      );
+      currentRounds = result.rounds;
+      if (result.points === 1) currentRounds = 0;
+    }
+    return [];
+  }
+  function validateMatch(heroTeam, opponentTeam, startRounds, teamSlot, roundLogs) {
+    const order = [
+      ...opponentTeam.list.map((girl) => ({
+        attacker: girl,
+        attackerTeam: opponentTeam,
+        defenderTeam: heroTeam,
+        heroTeam,
+        opponentTeam,
+        teamSlot
+      })),
+      ...heroTeam.list.map((girl) => ({
+        attacker: girl,
+        attackerTeam: heroTeam,
+        defenderTeam: opponentTeam,
+        heroTeam,
+        opponentTeam,
+        teamSlot
+      }))
+    ];
+    order.sort((x3, y3) => y3.attacker.speed - x3.attacker.speed);
+    let logPos = 0;
+    for (let i3 = startRounds + 1; i3 <= 100; i3++) {
+      const results = validateRound(order, roundLogs, logPos);
+      logPos = results.logPos;
+      if (results.isOver) {
+        return { rounds: i3 };
+      }
+    }
+    return { points: 1, rounds: 100 };
+  }
+  function validateRound(order, roundLogs, logPos) {
+    for (let i3 = 0, n2 = order.length; i3 < n2; i3++) {
+      const turn = order[i3 % n2];
+      if (i3 === 0) {
+        defenses_up_default.simulate([turn.attackerTeam, turn.defenderTeam]);
+      }
+      try {
+        const results = validateTurn(turn, roundLogs, logPos);
+        logPos = results.logPos;
+        if (results.isOver) return results;
+      } catch (e2) {
+        console.log(roundLogs[logPos], roundLogs, logPos);
+        console.log(e2);
+        throw e2;
+      }
+    }
+    return { isOver: false, logPos };
+  }
+  function validateTurn(params, roundLogs, logPos) {
+    const { attacker, attackerTeam, defenderTeam } = params;
+    let isSkip = false;
+    isSkip ||= attacker.is_defeated;
+    isSkip ||= attacker.stun_summary > 0 && attacker.burn_summary.length == 0;
+    if (isSkip) {
+      if (params.attacker.is_hero_fighter === (roundLogs[logPos]?.who === "hero") && params.attacker.id_girl === roundLogs[logPos]?.attacker_id_girl) {
+        console.log(params, roundLogs[logPos]);
+        console.log(logPos, roundLogs);
+        throw new Error("Actual: turn is not skipped");
+      }
+      return { isOver: false, logPos };
+    }
+    const roundLog = roundLogs[logPos++];
+    if (roundLog.attacker_id_girl !== attacker.id_girl) {
+      throw new Error("wrong turn", {
+        cause: {
+          expected: attacker.id_girl,
+          actual: roundLog.attacker_id_girl,
+          roundLog,
+          logPos
+        }
+      });
+    }
+    validateInitial(params, roundLog);
+    validateHit(params, roundLog);
+    validateAfterHit(params, roundLog);
+    if (isDefeated(defenderTeam)) {
+      return { isOver: true, logPos };
+    }
+    validateSkill(params, roundLog);
+    validateAfterSkill(params, roundLog);
+    if (isDefeated(defenderTeam)) {
+      return { isOver: true, logPos };
+    }
+    stun_default.simulate(params);
+    burn_default.simulate({ attacker });
+    validateAfterStatusEffect(params, roundLog);
+    if (isDefeated(attackerTeam)) {
+      return { isOver: true, logPos };
+    }
+    return { isOver: false, logPos };
+  }
+  function validateInitial(expected, actual) {
+    const logs = [];
+    logs.push(validateTeam(expected.heroTeam, actual.changes.hero.initial));
+    logs.push(
+      validateTeam(expected.opponentTeam, actual.changes.opponent.initial)
+    );
+    if (logs.some(Boolean)) {
+      throw new Error("validateInitial");
+    }
+    return logs.some(Boolean);
+  }
+  function validateAfterHit(params, roundLog) {
+    const { heroTeam, opponentTeam } = params;
+    const { hero, opponent } = roundLog.changes;
+    validateEachAfterHit(heroTeam, hero);
+    validateEachAfterHit(opponentTeam, opponent);
+    function validateEachAfterHit(team, change) {
+      const { initial, after_hit } = change;
+      const current = getPatchedTeam(initial, after_hit);
+      validateTeam(team, current);
+    }
+  }
+  function validateAfterSkill(params, roundLog) {
+    const { hero, opponent } = roundLog.changes;
+    validateEachAfterSkill(params.heroTeam, hero);
+    validateEachAfterSkill(params.opponentTeam, opponent);
+    function validateEachAfterSkill(team, change) {
+      const { initial, after_hit, after_skill } = change;
+      let current = getPatchedTeam(initial, after_hit);
+      current = getPatchedTeam(current, after_skill);
+      validateTeam(team, current);
+    }
+  }
+  function validateAfterStatusEffect(params, roundLog) {
+    const { hero, opponent } = roundLog.changes;
+    validateEachAfterSkill(params.heroTeam, hero);
+    validateEachAfterSkill(params.opponentTeam, opponent);
+    function validateEachAfterSkill(team, change) {
+      const { initial, after_hit, after_skill, after_status_effect } = change;
+      let current = getPatchedTeam(initial, after_hit);
+      current = getPatchedTeam(current, after_skill);
+      current = getPatchedTeam(current, after_status_effect);
+      validateTeam(team, current);
+    }
+  }
+
   // src/modules/penta-drill-sim/style.css
   var style_default3 = ".pdsim-result-box {\n  position: relative;\n  width: 100%;\n  height: 0;\n}\n.pdsim-result-box .pdsim-result {\n  position: absolute;\n  width: max-content;\n  height: 0;\n  line-height: 1.25rem;\n  text-align: center;\n  text-shadow:\n    -1px -1px 0 #000,\n    -1px 1px 0 #000,\n    1px -1px 0 #000,\n    1px 1px 0 #000;\n  z-index: 1;\n}\n.pdsim-result-box .pdsim-result .pdsim-label {\n  font-size: 0.75rem;\n}\n.pdsim-result-box .pdsim-result.pdsim-pending {\n  color: #999;\n}\n.penta-drill-battle .pdsim-result-box .pdsim-result {\n  bottom: 3rem;\n}\n.penta-drill-battle .pdsim-result-box .pdsim-result.pdsim-right {\n  right: 0;\n}\n.penta-drill-battle .pdsim-result-box .pdsim-result.pdsim-left {\n  left: 0;\n}\n.opponent-info-container .pdsim-result-box .pdsim-result {\n  bottom: 3.5rem;\n}\n.opponent-info-container .pdsim-result-box .pdsim-result.pdsim-right {\n  right: 9%;\n}\n.opponent-info-container .pdsim-result-box .pdsim-result.pdsim-left {\n  left: 9%;\n}\n";
 
@@ -2399,8 +2709,13 @@
     settings: [
       { key: "arena", default: true, label: "Run on table page" },
       { key: "preBattle", default: true, label: "Run on pre-battle page" },
-      { key: "heavy", default: false, label: "Heavy simulation (slow)" }
+      { key: "heavy", default: false, label: "Heavy simulation (slow)" },
       // { key: 'developer', default: false, label: 'Developer mode' },
+      {
+        key: "debugLog",
+        default: false,
+        label: "Output debug log to console"
+      }
     ],
     async run(settings) {
       if (settings.arena && page_exports.startsWith("/penta-drill-arena.html")) {
@@ -2489,6 +2804,25 @@
           const $box = createSimResultsBox(expected);
           $(".opponent_rewards").after($box);
         }
+      }
+      if (settings.debugLog && page_exports.startsWith("/penta-drill-battle.html")) {
+        $(document).ajaxComplete((_event, jqXHR, ajaxOptions) => {
+          const { url, data } = ajaxOptions;
+          if (!url?.startsWith("/ajax.php")) return;
+          if (typeof data !== "string") return;
+          if (data.includes("action=do_battles_penta_drill")) {
+            const { hero_fighter_v4, opponent_fighter_v4 } = unsafeWindow;
+            if (hero_fighter_v4 == null || opponent_fighter_v4 == null) return;
+            const responseData = jqXHR.responseJSON;
+            const debugLog = {
+              hero_fighter_v4,
+              opponent_fighter_v4,
+              responseData
+            };
+            console.log(JSON.stringify(debugLog));
+            validatePentaDrill(debugLog);
+          }
+        });
       }
       function createSimResultsBox(expected) {
         const $box = $(V2(/* @__PURE__ */ u3("div", { className: "pdsim-result-box" })));

@@ -236,9 +236,9 @@ export function simulateAttack({ attacker, defenderTeam }: TurnParams) {
     defender = getLowestEgoValue(defenderTeam);
   } else {
     let targets = defenderTeam.front.filter((e) => !e.is_defeated);
-    if (targets.length == 0)
+    if (targets.length === 0)
       targets = defenderTeam.middle.filter((e) => !e.is_defeated);
-    if (targets.length == 0)
+    if (targets.length === 0)
       targets = defenderTeam.back.filter((e) => !e.is_defeated);
     defender = selectTargetFrom(targets);
   }

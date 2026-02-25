@@ -1,6 +1,6 @@
 {
   "name": "hh-penta-drill-sim",
-  "version": "0.0.22",
+  "version": "0.0.23",
   "description": "Add Penta Drill simulator for Hentai Heroes",
   "main": "index.js",
   "type": "module",

@@ -2,6 +2,8 @@
  * Common
  */
 
+import type { RoundLog } from '../simulator/validator';
+
 export const Rarities = [
   'starting',
   'common',
@@ -350,4 +352,17 @@ export interface SimGirl extends RoundInitialGirl {
   is_defeated: boolean;
   burn_summary: { damage: number; rounds_left: number }[];
   stun_summary: number;
+}
+
+export type PentaDrillBattleResponseData =
+  | { success: false }
+  | {
+      success: true;
+      team_rounds: { rounds: RoundLog[] }[];
+    };
+
+export interface BattleDebugLog {
+  hero_fighter_v4: FighterLog;
+  opponent_fighter_v4: FighterLog;
+  responseData: PentaDrillBattleResponseData;
 }
